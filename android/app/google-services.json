@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "149796411344",
+    "project_id": "vikingfit-5ccb3",
+    "storage_bucket": "vikingfit-5ccb3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:149796411344:android:6f74f4aaa11eac99d7cbd5",
+        "android_client_info": {
+          "package_name": "com.example.nutri_viking_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBxUQqyw_eToeCL9rMa7qCllY6vLySfiE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

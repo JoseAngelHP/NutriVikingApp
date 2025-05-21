@@ -1,0 +1,456 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.example.nutri_viking_app"
+4    android:versionCode="1"
+5    android:versionName="1.0.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="35" />
+10    <!--
+11         Required to query activities that can process text, see:
+12         https://developer.android.com/training/package-visibility and
+13         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+14
+15         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin.
+16    -->
+17    <queries>
+17-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:39:5-44:15
+18        <intent>
+18-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:40:9-43:18
+19            <action android:name="android.intent.action.PROCESS_TEXT" />
+19-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:41:13-72
+19-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:41:21-70
+20
+21            <data android:mimeType="text/plain" />
+21-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:42:13-50
+21-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:42:19-48
+22        </intent>
+23    </queries>
+24
+25    <uses-permission android:name="android.permission.CAMERA" />
+25-->[:mobile_scanner] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\mobile_scanner\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:7:5-65
+25-->[:mobile_scanner] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\mobile_scanner\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:7:22-62
+26
+27    <uses-feature
+27-->[:mobile_scanner] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\mobile_scanner\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:9:5-11:36
+28        android:name="android.hardware.camera"
+28-->[:mobile_scanner] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\mobile_scanner\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:10:9-47
+29        android:required="false" />
+29-->[:mobile_scanner] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\mobile_scanner\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:11:9-33
+30
+31    <uses-permission android:name="android.permission.INTERNET" />
+31-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:25:5-67
+31-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:25:22-64
+32    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+32-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:26:5-79
+32-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:26:22-76
+33    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+33-->[com.google.android.recaptcha:recaptcha:18.4.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\d811af817aa0e87ef449ded17d25778f\transformed\jetified-recaptcha-18.4.0\AndroidManifest.xml:9:5-98
+33-->[com.google.android.recaptcha:recaptcha:18.4.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\d811af817aa0e87ef449ded17d25778f\transformed\jetified-recaptcha-18.4.0\AndroidManifest.xml:9:22-95
+34
+35    <permission
+35-->[androidx.core:core:1.13.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\417e7c87884e08d4d7995f4b5128db34\transformed\core-1.13.1\AndroidManifest.xml:22:5-24:47
+36        android:name="com.example.nutri_viking_app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+36-->[androidx.core:core:1.13.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\417e7c87884e08d4d7995f4b5128db34\transformed\core-1.13.1\AndroidManifest.xml:23:9-81
+37        android:protectionLevel="signature" />
+37-->[androidx.core:core:1.13.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\417e7c87884e08d4d7995f4b5128db34\transformed\core-1.13.1\AndroidManifest.xml:24:9-44
+38
+39    <uses-permission android:name="com.example.nutri_viking_app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+39-->[androidx.core:core:1.13.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\417e7c87884e08d4d7995f4b5128db34\transformed\core-1.13.1\AndroidManifest.xml:26:5-97
+39-->[androidx.core:core:1.13.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\417e7c87884e08d4d7995f4b5128db34\transformed\core-1.13.1\AndroidManifest.xml:26:22-94
+40
+41    <application
+42        android:name="android.app.Application"
+42-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:4:9-42
+43        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+43-->[androidx.core:core:1.13.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\417e7c87884e08d4d7995f4b5128db34\transformed\core-1.13.1\AndroidManifest.xml:28:18-86
+44        android:extractNativeLibs="true"
+45        android:icon="@mipmap/ic_launcher"
+45-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:5:9-43
+46        android:label="RepFit" >
+46-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:3:9-31
+47        <activity
+47-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:6:9-27:20
+48            android:name="com.example.nutri_viking_app.MainActivity"
+48-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:7:13-41
+49            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
+49-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:12:13-163
+50            android:exported="true"
+50-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:8:13-36
+51            android:hardwareAccelerated="true"
+51-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:13:13-47
+52            android:launchMode="singleTop"
+52-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:9:13-43
+53            android:taskAffinity=""
+53-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:10:13-36
+54            android:theme="@style/LaunchTheme"
+54-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:11:13-47
+55            android:windowSoftInputMode="adjustResize" >
+55-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:14:13-55
+56
+57            <!--
+58                 Specifies an Android theme to apply to this Activity as soon as
+59                 the Android process has started. This theme is visible to the user
+60                 while the Flutter UI initializes. After that, this theme continues
+61                 to determine the Window background behind the Flutter UI.
+62            -->
+63            <meta-data
+63-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:19:13-22:17
+64                android:name="io.flutter.embedding.android.NormalTheme"
+64-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:20:15-70
+65                android:resource="@style/NormalTheme" />
+65-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:21:15-52
+66
+67            <intent-filter>
+67-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:23:13-26:29
+68                <action android:name="android.intent.action.MAIN" />
+68-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:24:17-68
+68-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:24:25-66
+69
+70                <category android:name="android.intent.category.LAUNCHER" />
+70-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:25:17-76
+70-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:25:27-74
+71            </intent-filter>
+72        </activity>
+73        <!--
+74             Don't delete the meta-data below.
+75             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java
+76        -->
+77        <meta-data
+77-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:30:9-32:33
+78            android:name="flutterEmbedding"
+78-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:31:13-44
+79            android:value="2" />
+79-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:32:13-30
+80
+81        <service
+81-->[:cloud_firestore] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\cloud_firestore\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:8:9-12:19
+82            android:name="com.google.firebase.components.ComponentDiscoveryService"
+82-->[:cloud_firestore] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\cloud_firestore\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:8:18-89
+83            android:directBootAware="true"
+83-->[com.google.firebase:firebase-common:20.4.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\adab92a58169542b1b2ce6e25cf30476\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:32:13-43
+84            android:exported="false" >
+84-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:68:13-37
+85            <meta-data
+85-->[:cloud_firestore] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\cloud_firestore\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:9:13-11:85
+86                android:name="com.google.firebase.components:io.flutter.plugins.firebase.firestore.FlutterFirebaseFirestoreRegistrar"
+86-->[:cloud_firestore] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\cloud_firestore\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:10:17-134
+87                android:value="com.google.firebase.components.ComponentRegistrar" />
+87-->[:cloud_firestore] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\cloud_firestore\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:11:17-82
+88            <meta-data
+88-->[:firebase_auth] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\firebase_auth\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:9:13-11:85
+89                android:name="com.google.firebase.components:io.flutter.plugins.firebase.auth.FlutterFirebaseAuthRegistrar"
+89-->[:firebase_auth] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\firebase_auth\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:10:17-124
+90                android:value="com.google.firebase.components.ComponentRegistrar" />
+90-->[:firebase_auth] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\firebase_auth\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:11:17-82
+91            <meta-data
+91-->[:firebase_core] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\firebase_core\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:9:13-11:85
+92                android:name="com.google.firebase.components:io.flutter.plugins.firebase.core.FlutterFirebaseCoreRegistrar"
+92-->[:firebase_core] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\firebase_core\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:10:17-124
+93                android:value="com.google.firebase.components.ComponentRegistrar" />
+93-->[:firebase_core] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\firebase_core\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:11:17-82
+94            <meta-data
+94-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:69:13-71:85
+95                android:name="com.google.firebase.components:com.google.firebase.auth.FirebaseAuthRegistrar"
+95-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:70:17-109
+96                android:value="com.google.firebase.components.ComponentRegistrar" />
+96-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:71:17-82
+97            <meta-data
+97-->[com.google.firebase:firebase-firestore:24.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\e91c72019b9bbc27809f90ee8d8a86a4\transformed\jetified-firebase-firestore-24.11.0\AndroidManifest.xml:17:13-19:85
+98                android:name="com.google.firebase.components:com.google.firebase.firestore.FirebaseFirestoreKtxRegistrar"
+98-->[com.google.firebase:firebase-firestore:24.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\e91c72019b9bbc27809f90ee8d8a86a4\transformed\jetified-firebase-firestore-24.11.0\AndroidManifest.xml:18:17-122
+99                android:value="com.google.firebase.components.ComponentRegistrar" />
+99-->[com.google.firebase:firebase-firestore:24.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\e91c72019b9bbc27809f90ee8d8a86a4\transformed\jetified-firebase-firestore-24.11.0\AndroidManifest.xml:19:17-82
+100            <meta-data
+100-->[com.google.firebase:firebase-firestore:24.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\e91c72019b9bbc27809f90ee8d8a86a4\transformed\jetified-firebase-firestore-24.11.0\AndroidManifest.xml:20:13-22:85
+101                android:name="com.google.firebase.components:com.google.firebase.firestore.FirestoreRegistrar"
+101-->[com.google.firebase:firebase-firestore:24.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\e91c72019b9bbc27809f90ee8d8a86a4\transformed\jetified-firebase-firestore-24.11.0\AndroidManifest.xml:21:17-111
+102                android:value="com.google.firebase.components.ComponentRegistrar" />
+102-->[com.google.firebase:firebase-firestore:24.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\e91c72019b9bbc27809f90ee8d8a86a4\transformed\jetified-firebase-firestore-24.11.0\AndroidManifest.xml:22:17-82
+103            <meta-data
+103-->[com.google.firebase:firebase-common-ktx:20.4.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\515634100ae9a78d86ede81b8ec486d2\transformed\jetified-firebase-common-ktx-20.4.3\AndroidManifest.xml:12:13-14:85
+104                android:name="com.google.firebase.components:com.google.firebase.ktx.FirebaseCommonLegacyRegistrar"
+104-->[com.google.firebase:firebase-common-ktx:20.4.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\515634100ae9a78d86ede81b8ec486d2\transformed\jetified-firebase-common-ktx-20.4.3\AndroidManifest.xml:13:17-116
+105                android:value="com.google.firebase.components.ComponentRegistrar" />
+105-->[com.google.firebase:firebase-common-ktx:20.4.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\515634100ae9a78d86ede81b8ec486d2\transformed\jetified-firebase-common-ktx-20.4.3\AndroidManifest.xml:14:17-82
+106            <meta-data
+106-->[com.google.firebase:firebase-common:20.4.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\adab92a58169542b1b2ce6e25cf30476\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:35:13-37:85
+107                android:name="com.google.firebase.components:com.google.firebase.FirebaseCommonKtxRegistrar"
+107-->[com.google.firebase:firebase-common:20.4.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\adab92a58169542b1b2ce6e25cf30476\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:36:17-109
+108                android:value="com.google.firebase.components.ComponentRegistrar" />
+108-->[com.google.firebase:firebase-common:20.4.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\adab92a58169542b1b2ce6e25cf30476\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:37:17-82
+109        </service>
+110
+111        <activity
+111-->[:url_launcher_android] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\url_launcher_android\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:8:9-11:74
+112            android:name="io.flutter.plugins.urllauncher.WebViewActivity"
+112-->[:url_launcher_android] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\url_launcher_android\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:9:13-74
+113            android:exported="false"
+113-->[:url_launcher_android] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\url_launcher_android\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:10:13-37
+114            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+114-->[:url_launcher_android] C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\build\url_launcher_android\intermediates\merged_manifest\release\processReleaseManifest\AndroidManifest.xml:11:13-71
+115        <!--
+116        Service for holding metadata. Cannot be instantiated.
+117        Metadata will be merged from other manifests.
+118        -->
+119        <service
+119-->[androidx.camera:camera-core:1.3.4] C:\Users\hiler\.gradle\caches\8.10.2\transforms\acd0d4708d859ba55a6ccc5ebd029ee9\transformed\jetified-camera-core-1.3.4\AndroidManifest.xml:29:9-33:78
+120            android:name="androidx.camera.core.impl.MetadataHolderService"
+120-->[androidx.camera:camera-core:1.3.4] C:\Users\hiler\.gradle\caches\8.10.2\transforms\acd0d4708d859ba55a6ccc5ebd029ee9\transformed\jetified-camera-core-1.3.4\AndroidManifest.xml:30:13-75
+121            android:enabled="false"
+121-->[androidx.camera:camera-core:1.3.4] C:\Users\hiler\.gradle\caches\8.10.2\transforms\acd0d4708d859ba55a6ccc5ebd029ee9\transformed\jetified-camera-core-1.3.4\AndroidManifest.xml:31:13-36
+122            android:exported="false" >
+122-->[androidx.camera:camera-core:1.3.4] C:\Users\hiler\.gradle\caches\8.10.2\transforms\acd0d4708d859ba55a6ccc5ebd029ee9\transformed\jetified-camera-core-1.3.4\AndroidManifest.xml:32:13-37
+123            <meta-data
+123-->[androidx.camera:camera-camera2:1.3.4] C:\Users\hiler\.gradle\caches\8.10.2\transforms\fdfe289c87000c7232b965370fbce30b\transformed\jetified-camera-camera2-1.3.4\AndroidManifest.xml:30:13-32:89
+124                android:name="androidx.camera.core.impl.MetadataHolderService.DEFAULT_CONFIG_PROVIDER"
+124-->[androidx.camera:camera-camera2:1.3.4] C:\Users\hiler\.gradle\caches\8.10.2\transforms\fdfe289c87000c7232b965370fbce30b\transformed\jetified-camera-camera2-1.3.4\AndroidManifest.xml:31:17-103
+125                android:value="androidx.camera.camera2.Camera2Config$DefaultProvider" />
+125-->[androidx.camera:camera-camera2:1.3.4] C:\Users\hiler\.gradle\caches\8.10.2\transforms\fdfe289c87000c7232b965370fbce30b\transformed\jetified-camera-camera2-1.3.4\AndroidManifest.xml:32:17-86
+126        </service>
+127
+128        <activity
+128-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:29:9-46:20
+129            android:name="com.google.firebase.auth.internal.GenericIdpActivity"
+129-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:30:13-80
+130            android:excludeFromRecents="true"
+130-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:31:13-46
+131            android:exported="true"
+131-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:32:13-36
+132            android:launchMode="singleTask"
+132-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:33:13-44
+133            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+133-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:34:13-72
+134            <intent-filter>
+134-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:35:13-45:29
+135                <action android:name="android.intent.action.VIEW" />
+135-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:36:17-69
+135-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:36:25-66
+136
+137                <category android:name="android.intent.category.DEFAULT" />
+137-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:38:17-76
+137-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:38:27-73
+138                <category android:name="android.intent.category.BROWSABLE" />
+138-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:39:17-78
+138-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:39:27-75
+139
+140                <data
+140-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:42:13-50
+141                    android:host="firebase.auth"
+142                    android:path="/"
+143                    android:scheme="genericidp" />
+144            </intent-filter>
+145        </activity>
+146        <activity
+146-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:47:9-64:20
+147            android:name="com.google.firebase.auth.internal.RecaptchaActivity"
+147-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:48:13-79
+148            android:excludeFromRecents="true"
+148-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:49:13-46
+149            android:exported="true"
+149-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:50:13-36
+150            android:launchMode="singleTask"
+150-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:51:13-44
+151            android:theme="@android:style/Theme.Translucent.NoTitleBar" >
+151-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:52:13-72
+152            <intent-filter>
+152-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:53:13-63:29
+153                <action android:name="android.intent.action.VIEW" />
+153-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:36:17-69
+153-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:36:25-66
+154
+155                <category android:name="android.intent.category.DEFAULT" />
+155-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:38:17-76
+155-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:38:27-73
+156                <category android:name="android.intent.category.BROWSABLE" />
+156-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:39:17-78
+156-->[com.google.firebase:firebase-auth:22.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\8492f150d9e77e99f7e071a69f4b6792\transformed\jetified-firebase-auth-22.3.1\AndroidManifest.xml:39:27-75
+157
+158                <data
+158-->C:\Users\hiler\OneDrive\Escritorio\Nutri_App\nutri_viking_app\android\app\src\main\AndroidManifest.xml:42:13-50
+159                    android:host="firebase.auth"
+160                    android:path="/"
+161                    android:scheme="recaptcha" />
+162            </intent-filter>
+163        </activity>
+164
+165        <uses-library
+165-->[androidx.window:window:1.2.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\a9c9109d84222ef39ccd74e88c2f7c1d\transformed\jetified-window-1.2.0\AndroidManifest.xml:23:9-25:40
+166            android:name="androidx.window.extensions"
+166-->[androidx.window:window:1.2.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\a9c9109d84222ef39ccd74e88c2f7c1d\transformed\jetified-window-1.2.0\AndroidManifest.xml:24:13-54
+167            android:required="false" />
+167-->[androidx.window:window:1.2.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\a9c9109d84222ef39ccd74e88c2f7c1d\transformed\jetified-window-1.2.0\AndroidManifest.xml:25:13-37
+168        <uses-library
+168-->[androidx.window:window:1.2.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\a9c9109d84222ef39ccd74e88c2f7c1d\transformed\jetified-window-1.2.0\AndroidManifest.xml:26:9-28:40
+169            android:name="androidx.window.sidecar"
+169-->[androidx.window:window:1.2.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\a9c9109d84222ef39ccd74e88c2f7c1d\transformed\jetified-window-1.2.0\AndroidManifest.xml:27:13-51
+170            android:required="false" />
+170-->[androidx.window:window:1.2.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\a9c9109d84222ef39ccd74e88c2f7c1d\transformed\jetified-window-1.2.0\AndroidManifest.xml:28:13-37
+171
+172        <provider
+172-->[com.google.firebase:firebase-common:20.4.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\adab92a58169542b1b2ce6e25cf30476\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:23:9-28:39
+173            android:name="com.google.firebase.provider.FirebaseInitProvider"
+173-->[com.google.firebase:firebase-common:20.4.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\adab92a58169542b1b2ce6e25cf30476\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:24:13-77
+174            android:authorities="com.example.nutri_viking_app.firebaseinitprovider"
+174-->[com.google.firebase:firebase-common:20.4.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\adab92a58169542b1b2ce6e25cf30476\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:25:13-72
+175            android:directBootAware="true"
+175-->[com.google.firebase:firebase-common:20.4.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\adab92a58169542b1b2ce6e25cf30476\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:26:13-43
+176            android:exported="false"
+176-->[com.google.firebase:firebase-common:20.4.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\adab92a58169542b1b2ce6e25cf30476\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:27:13-37
+177            android:initOrder="100" />
+177-->[com.google.firebase:firebase-common:20.4.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\adab92a58169542b1b2ce6e25cf30476\transformed\jetified-firebase-common-20.4.3\AndroidManifest.xml:28:13-36
+178
+179        <service
+179-->[com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\025c84e0418bd0757b738030b634a285\transformed\jetified-play-services-mlkit-barcode-scanning-18.3.1\AndroidManifest.xml:9:9-15:19
+180            android:name="com.google.mlkit.common.internal.MlKitComponentDiscoveryService"
+180-->[com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\025c84e0418bd0757b738030b634a285\transformed\jetified-play-services-mlkit-barcode-scanning-18.3.1\AndroidManifest.xml:10:13-91
+181            android:directBootAware="true"
+181-->[com.google.mlkit:common:18.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\349311ac12ee92756f2a8284f83b76af\transformed\jetified-common-18.11.0\AndroidManifest.xml:17:13-43
+182            android:exported="false" >
+182-->[com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\025c84e0418bd0757b738030b634a285\transformed\jetified-play-services-mlkit-barcode-scanning-18.3.1\AndroidManifest.xml:11:13-37
+183            <meta-data
+183-->[com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\025c84e0418bd0757b738030b634a285\transformed\jetified-play-services-mlkit-barcode-scanning-18.3.1\AndroidManifest.xml:12:13-14:85
+184                android:name="com.google.firebase.components:com.google.mlkit.vision.barcode.internal.BarcodeRegistrar"
+184-->[com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\025c84e0418bd0757b738030b634a285\transformed\jetified-play-services-mlkit-barcode-scanning-18.3.1\AndroidManifest.xml:13:17-120
+185                android:value="com.google.firebase.components.ComponentRegistrar" />
+185-->[com.google.android.gms:play-services-mlkit-barcode-scanning:18.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\025c84e0418bd0757b738030b634a285\transformed\jetified-play-services-mlkit-barcode-scanning-18.3.1\AndroidManifest.xml:14:17-82
+186            <meta-data
+186-->[com.google.mlkit:vision-common:17.3.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\537cac6b087d98164b5a21b7dace300e\transformed\jetified-vision-common-17.3.0\AndroidManifest.xml:12:13-14:85
+187                android:name="com.google.firebase.components:com.google.mlkit.vision.common.internal.VisionCommonRegistrar"
+187-->[com.google.mlkit:vision-common:17.3.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\537cac6b087d98164b5a21b7dace300e\transformed\jetified-vision-common-17.3.0\AndroidManifest.xml:13:17-124
+188                android:value="com.google.firebase.components.ComponentRegistrar" />
+188-->[com.google.mlkit:vision-common:17.3.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\537cac6b087d98164b5a21b7dace300e\transformed\jetified-vision-common-17.3.0\AndroidManifest.xml:14:17-82
+189            <meta-data
+189-->[com.google.mlkit:common:18.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\349311ac12ee92756f2a8284f83b76af\transformed\jetified-common-18.11.0\AndroidManifest.xml:20:13-22:85
+190                android:name="com.google.firebase.components:com.google.mlkit.common.internal.CommonComponentRegistrar"
+190-->[com.google.mlkit:common:18.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\349311ac12ee92756f2a8284f83b76af\transformed\jetified-common-18.11.0\AndroidManifest.xml:21:17-120
+191                android:value="com.google.firebase.components.ComponentRegistrar" />
+191-->[com.google.mlkit:common:18.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\349311ac12ee92756f2a8284f83b76af\transformed\jetified-common-18.11.0\AndroidManifest.xml:22:17-82
+192        </service>
+193
+194        <provider
+194-->[com.google.mlkit:common:18.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\349311ac12ee92756f2a8284f83b76af\transformed\jetified-common-18.11.0\AndroidManifest.xml:9:9-13:38
+195            android:name="com.google.mlkit.common.internal.MlKitInitProvider"
+195-->[com.google.mlkit:common:18.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\349311ac12ee92756f2a8284f83b76af\transformed\jetified-common-18.11.0\AndroidManifest.xml:10:13-78
+196            android:authorities="com.example.nutri_viking_app.mlkitinitprovider"
+196-->[com.google.mlkit:common:18.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\349311ac12ee92756f2a8284f83b76af\transformed\jetified-common-18.11.0\AndroidManifest.xml:11:13-69
+197            android:exported="false"
+197-->[com.google.mlkit:common:18.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\349311ac12ee92756f2a8284f83b76af\transformed\jetified-common-18.11.0\AndroidManifest.xml:12:13-37
+198            android:initOrder="99" />
+198-->[com.google.mlkit:common:18.11.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\349311ac12ee92756f2a8284f83b76af\transformed\jetified-common-18.11.0\AndroidManifest.xml:13:13-35
+199
+200        <activity
+200-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\3bd6afadb1d2da08d072910940e05d5e\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:9-173
+201            android:name="com.google.android.gms.common.api.GoogleApiActivity"
+201-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\3bd6afadb1d2da08d072910940e05d5e\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:19-85
+202            android:exported="false"
+202-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\3bd6afadb1d2da08d072910940e05d5e\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:146-170
+203            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+203-->[com.google.android.gms:play-services-base:18.5.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\3bd6afadb1d2da08d072910940e05d5e\transformed\jetified-play-services-base-18.5.0\AndroidManifest.xml:5:86-145
+204
+205        <meta-data
+205-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\e71aa275b9d4ba7027a65c58a1a47617\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:9-122
+206            android:name="com.google.android.gms.version"
+206-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\e71aa275b9d4ba7027a65c58a1a47617\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:20-65
+207            android:value="@integer/google_play_services_version" />
+207-->[com.google.android.gms:play-services-basement:18.4.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\e71aa275b9d4ba7027a65c58a1a47617\transformed\jetified-play-services-basement-18.4.0\AndroidManifest.xml:6:66-119
+208
+209        <provider
+209-->[androidx.emoji2:emoji2:1.2.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\080975bcb6e8c7edea68b9e65269c0bb\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:24:9-32:20
+210            android:name="androidx.startup.InitializationProvider"
+210-->[androidx.emoji2:emoji2:1.2.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\080975bcb6e8c7edea68b9e65269c0bb\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:25:13-67
+211            android:authorities="com.example.nutri_viking_app.androidx-startup"
+211-->[androidx.emoji2:emoji2:1.2.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\080975bcb6e8c7edea68b9e65269c0bb\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:26:13-68
+212            android:exported="false" >
+212-->[androidx.emoji2:emoji2:1.2.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\080975bcb6e8c7edea68b9e65269c0bb\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:27:13-37
+213            <meta-data
+213-->[androidx.emoji2:emoji2:1.2.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\080975bcb6e8c7edea68b9e65269c0bb\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:29:13-31:52
+214                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+214-->[androidx.emoji2:emoji2:1.2.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\080975bcb6e8c7edea68b9e65269c0bb\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:30:17-75
+215                android:value="androidx.startup" />
+215-->[androidx.emoji2:emoji2:1.2.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\080975bcb6e8c7edea68b9e65269c0bb\transformed\jetified-emoji2-1.2.0\AndroidManifest.xml:31:17-49
+216            <meta-data
+216-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\746f23c1d25830275379ca1a82fb18f6\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:29:13-31:52
+217                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+217-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\746f23c1d25830275379ca1a82fb18f6\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:30:17-78
+218                android:value="androidx.startup" />
+218-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\hiler\.gradle\caches\8.10.2\transforms\746f23c1d25830275379ca1a82fb18f6\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:31:17-49
+219            <meta-data
+219-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:29:13-31:52
+220                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+220-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:30:17-85
+221                android:value="androidx.startup" />
+221-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:31:17-49
+222        </provider>
+223
+224        <receiver
+224-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:34:9-52:20
+225            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+225-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:35:13-76
+226            android:directBootAware="false"
+226-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:36:13-44
+227            android:enabled="true"
+227-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:37:13-35
+228            android:exported="true"
+228-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:38:13-36
+229            android:permission="android.permission.DUMP" >
+229-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:39:13-57
+230            <intent-filter>
+230-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:40:13-42:29
+231                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+231-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:41:17-91
+231-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:41:25-88
+232            </intent-filter>
+233            <intent-filter>
+233-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:43:13-45:29
+234                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+234-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:44:17-85
+234-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:44:25-82
+235            </intent-filter>
+236            <intent-filter>
+236-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:46:13-48:29
+237                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+237-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:47:17-88
+237-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:47:25-85
+238            </intent-filter>
+239            <intent-filter>
+239-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:49:13-51:29
+240                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+240-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:50:17-95
+240-->[androidx.profileinstaller:profileinstaller:1.3.1] C:\Users\hiler\.gradle\caches\8.10.2\transforms\2b5226c59b8073618877757eb3f109ca\transformed\jetified-profileinstaller-1.3.1\AndroidManifest.xml:50:25-92
+241            </intent-filter>
+242        </receiver>
+243
+244        <service
+244-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\6f4904ce4c2bfb7a687ecc13e303d360\transformed\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:29:9-35:19
+245            android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery"
+245-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\6f4904ce4c2bfb7a687ecc13e303d360\transformed\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:30:13-103
+246            android:exported="false" >
+246-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\6f4904ce4c2bfb7a687ecc13e303d360\transformed\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:31:13-37
+247            <meta-data
+247-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\6f4904ce4c2bfb7a687ecc13e303d360\transformed\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:32:13-34:39
+248                android:name="backend:com.google.android.datatransport.cct.CctBackendFactory"
+248-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\6f4904ce4c2bfb7a687ecc13e303d360\transformed\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:33:17-94
+249                android:value="cct" />
+249-->[com.google.android.datatransport:transport-backend-cct:2.3.3] C:\Users\hiler\.gradle\caches\8.10.2\transforms\6f4904ce4c2bfb7a687ecc13e303d360\transformed\jetified-transport-backend-cct-2.3.3\AndroidManifest.xml:34:17-36
+250        </service>
+251        <service
+251-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\hiler\.gradle\caches\8.10.2\transforms\6a746ae73d6cdc28eeee038f5c0066d4\transformed\jetified-transport-runtime-2.2.6\AndroidManifest.xml:26:9-30:19
+252            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService"
+252-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\hiler\.gradle\caches\8.10.2\transforms\6a746ae73d6cdc28eeee038f5c0066d4\transformed\jetified-transport-runtime-2.2.6\AndroidManifest.xml:27:13-117
+253            android:exported="false"
+253-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\hiler\.gradle\caches\8.10.2\transforms\6a746ae73d6cdc28eeee038f5c0066d4\transformed\jetified-transport-runtime-2.2.6\AndroidManifest.xml:28:13-37
+254            android:permission="android.permission.BIND_JOB_SERVICE" >
+254-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\hiler\.gradle\caches\8.10.2\transforms\6a746ae73d6cdc28eeee038f5c0066d4\transformed\jetified-transport-runtime-2.2.6\AndroidManifest.xml:29:13-69
+255        </service>
+256
+257        <receiver
+257-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\hiler\.gradle\caches\8.10.2\transforms\6a746ae73d6cdc28eeee038f5c0066d4\transformed\jetified-transport-runtime-2.2.6\AndroidManifest.xml:32:9-34:40
+258            android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver"
+258-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\hiler\.gradle\caches\8.10.2\transforms\6a746ae73d6cdc28eeee038f5c0066d4\transformed\jetified-transport-runtime-2.2.6\AndroidManifest.xml:33:13-132
+259            android:exported="false" />
+259-->[com.google.android.datatransport:transport-runtime:2.2.6] C:\Users\hiler\.gradle\caches\8.10.2\transforms\6a746ae73d6cdc28eeee038f5c0066d4\transformed\jetified-transport-runtime-2.2.6\AndroidManifest.xml:34:13-37
+260    </application>
+261
+262</manifest>
