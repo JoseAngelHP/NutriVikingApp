@@ -231,7 +231,7 @@ class ClientHomeScreen extends StatelessWidget {
           SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+            /*children: [
               Row(
                 children: [
                   _buildMacroChip(
@@ -261,7 +261,7 @@ class ClientHomeScreen extends StatelessWidget {
                   fontSize: 14,
                 ),
               ),
-            ],
+            ],*/
           ),
           if (!isLast)
             Divider(color: Colors.white54, height: 16),
@@ -270,7 +270,7 @@ class ClientHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMacroChip(String label, String value, Color color) {
+  /*Widget _buildMacroChip(String label, String value, Color color) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -292,7 +292,7 @@ class ClientHomeScreen extends StatelessWidget {
         ],
       ),
     );
-  }
+  }*/
 
   void _logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
