@@ -229,70 +229,12 @@ class ClientHomeScreen extends StatelessWidget {
             ],
           ),
           SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            /*children: [
-              Row(
-                children: [
-                  _buildMacroChip(
-                    'C',
-                    '${food['carbs']?.toStringAsFixed(0) ?? '0'}g',
-                    Colors.amber,
-                  ),
-                  SizedBox(width: 6),
-                  _buildMacroChip(
-                    'P',
-                    '${food['protein']?.toStringAsFixed(0) ?? '0'}g',
-                    Colors.blue,
-                  ),
-                  SizedBox(width: 6),
-                  _buildMacroChip(
-                    'G',
-                    '${food['fats']?.toStringAsFixed(0) ?? '0'}g',
-                    Colors.purple,
-                  ),
-                ],
-              ),
-              Text(
-                '${food['calories']?.toStringAsFixed(0) ?? '0'} kcal',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-            ],*/
-          ),
           if (!isLast)
             Divider(color: Colors.white54, height: 16),
         ],
       ),
     );
   }
-
-  /*Widget _buildMacroChip(String label, String value, Color color) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            '$label: ',
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(value, style: TextStyle(color: Colors.white, fontSize: 12)),
-        ],
-      ),
-    );
-  }*/
 
   void _logout(BuildContext context) async {
     await FirebaseAuth.instance.signOut();
