@@ -10,40 +10,153 @@ class ClientHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFF301939),
-      appBar: AppBar(
-        title: Text(
-          'Mi Plan de Alimentación',
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Color(0xFFb51837),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout, color: Colors.white),
-            onPressed: () => _logout(context),
+    return DefaultTabController(
+      length: 2, // Número de pestañas (Alimentación + Ejercicios)
+      child: Scaffold(
+        backgroundColor: Color(0xFF301939),
+        appBar: AppBar(
+          title: Text(
+            'Mi Plan de Alimentación',
+            style: TextStyle(color: Colors.white),
           ),
-        ],
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF301939), Color(0xFF661c3a)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              _buildUserInfo(),
-              SizedBox(height: 20),
-              Expanded(child: _buildNutritionPlan()),
+          backgroundColor: Color(0xFFb51837),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.logout, color: Colors.white),
+              onPressed: () => _logout(context),
+            ),
+          ],
+          bottom: TabBar(
+            indicatorColor: Colors.white,
+            labelColor: Colors.white, // Color del texto de la pestaña seleccionada
+            unselectedLabelColor: Colors.white70, // Color del texto de pestañas no seleccionadas
+            labelStyle: TextStyle(fontWeight: FontWeight.bold),
+            tabs: [
+              Tab(icon: Icon(Icons.fastfood, color: Colors.white), text: 'Alimentación'),
+              Tab(icon: Icon(Icons.fitness_center, color: Colors.white), text: 'Ejercicios'),
             ],
           ),
         ),
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF301939), Color(0xFF661c3a)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                _buildUserInfo(),
+                SizedBox(height: 20),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      // Pestaña 1: Plan de Alimentación
+                      _buildNutritionPlan(),
+                      // Pestaña 2: Plan de Ejercicios
+                      _buildWorkoutPlan(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
+    );
+  }
+
+  Widget _buildWorkoutPlan() {
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream:
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(userId)
+              .collection('workouts')
+              .doc(today)
+              .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator(color: Colors.white));
+        }
+
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return Center(
+            child: Text(
+              'Tu coach aún no ha asignado ejercicios para hoy.\n\nRevisa más tarde o contacta a tu coach.',
+              style: TextStyle(color: Colors.white70, fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+          );
+        }
+
+        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final exercises = (data['exercises'] as List<dynamic>?) ?? [];
+
+        return ListView.separated(
+          itemCount: exercises.length,
+          separatorBuilder: (context, index) => SizedBox(height: 16),
+          itemBuilder: (context, index) {
+            final exercise = exercises[index] as Map<String, dynamic>;
+            return _buildExerciseSection(exercise);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildExerciseSection(Map<String, dynamic> exercise) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Card(
+          color: Color(0xFF4a1e5a),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  exercise['name'] ?? 'Ejercicio',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Series: ${exercise['sets'] ?? '0'}',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                    Text(
+                      'Repeticiones: ${exercise['reps'] ?? '0'}',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                  ],
+                ),
+                if (exercise['notes'] != null &&
+                    exercise['notes'].toString().isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Notas: ${exercise['notes']}',
+                      style: TextStyle(color: Colors.white54, fontSize: 14),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -229,8 +342,7 @@ class ClientHomeScreen extends StatelessWidget {
             ],
           ),
           SizedBox(height: 6),
-          if (!isLast)
-            Divider(color: Colors.white54, height: 16),
+          if (!isLast) Divider(color: Colors.white54, height: 16),
         ],
       ),
     );

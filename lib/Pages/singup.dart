@@ -66,7 +66,7 @@ class _SingUpState extends State<SingUp> {
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xffd17a0f), Color(0xff00a0b7), Color(0xff301939)],
+            colors: [Color(0xff000000), Color(0xfffd1d1d), Color(0xfffcb045)],
             begin: Alignment.topLeft,
             end: Alignment.topRight,
           ),

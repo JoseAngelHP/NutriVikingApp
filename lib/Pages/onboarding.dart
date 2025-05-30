@@ -18,7 +18,7 @@ class _OnboardingState extends State<Onboarding> {
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xffd17a0f), Color(0xff00d687), Color(0xff00a0b7)],
+            colors: [Color(0xff000000), Color(0xfffd1d1d), Color(0xfffcb045)],
             begin: Alignment.topLeft,
             end: Alignment.topRight,
           ),
@@ -160,7 +160,7 @@ class _OnboardingState extends State<Onboarding> {
                     child: Text(
                       "Developed by Jose Prado",
                       style: TextStyle(
-                        color: const Color.fromARGB(255, 51, 44, 44),
+                        color: const Color.fromARGB(255, 255, 255, 255),
                         fontSize: 14,
                         letterSpacing: 8,
                       ),

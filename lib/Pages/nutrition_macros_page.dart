@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:nutri_viking_app/Pages/Exercise.dart';
+import 'package:nutri_viking_app/Pages/add_exercise_dialog.dart';
 import 'food_model.dart';
 import 'add_food_dialog.dart';
 
@@ -200,22 +202,159 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
     }
   }
 
+  // Método para obtener alimentos guardados
+  Future<List<FoodItem>> _getSavedFoods() async {
+    try {
+      final querySnapshot =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.clientId)
+              .collection('saved_foods')
+              .get();
+
+      // Elimina duplicados por nombre (opcional)
+      final uniqueFoods = <String, FoodItem>{};
+      for (var doc in querySnapshot.docs) {
+        final food = FoodItem.fromMap(doc.data());
+        uniqueFoods[food.name] =
+            food; // Esto asegura que no haya duplicados por nombre
+      }
+
+      return uniqueFoods.values.toList();
+    } catch (e) {
+      print('Error obteniendo alimentos guardados: $e');
+      return [];
+    }
+  }
+
+  // Método para mostrar el diálogo de búsqueda
+  Future<void> _showSearchFoodDialog(String mealName) async {
+    final savedFoods = await _getSavedFoods();
+    String searchQuery = '';
+    List<FoodItem> filteredFoods = savedFoods;
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Buscar alimento'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText: 'Buscar...',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value.toLowerCase();
+                          filteredFoods =
+                              savedFoods
+                                  .where(
+                                    (food) => food.name.toLowerCase().contains(
+                                      searchQuery,
+                                    ),
+                                  )
+                                  .toList();
+                        });
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    if (filteredFoods.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          searchQuery.isEmpty
+                              ? 'No hay alimentos guardados'
+                              : 'No se encontraron resultados',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      )
+                    else
+                      Column(
+                        children:
+                            filteredFoods
+                                .map(
+                                  (food) => ListTile(
+                                    title: Text(food.name),
+                                    subtitle: Text(
+                                      '${food.calories.toStringAsFixed(0)} kcal | C:${food.carbs.toStringAsFixed(0)}g P:${food.protein.toStringAsFixed(0)}g G:${food.fats.toStringAsFixed(0)}g',
+                                    ),
+                                    trailing: IconButton(
+                                      icon: Icon(Icons.add),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                        _addFoodToMeal(mealName, food);
+                                      },
+                                    ),
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      _addFoodToMeal(mealName, food);
+                                    },
+                                  ),
+                                )
+                                .toList(),
+                      ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancelar'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _showAddFoodDialog(mealName);
+                  },
+                  child: Text('Nuevo alimento'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _addFoodToMeal(String mealName, FoodItem food) async {
     try {
       final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
-
-      // Obtener el documento actual
       final docRef = FirebaseFirestore.instance
           .collection('users')
           .doc(widget.clientId)
           .collection('nutrition')
           .doc(dateStr);
 
+      // Primero verifica si el alimento ya existe en saved_foods
+      final existingFoodQuery =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.clientId)
+              .collection('saved_foods')
+              .where('name', isEqualTo: food.name)
+              .limit(1)
+              .get();
+
+      // Si no existe, lo guardamos en saved_foods
+      if (existingFoodQuery.docs.isEmpty) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.clientId)
+            .collection('saved_foods')
+            .add(food.toMap());
+      }
+
       await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final doc = await docRef.get();
-        final defaultData = await _getDefaultNutritionData(); // Ahora con await
-        final data =
-            doc.exists ? doc.data()! : defaultData; // Usamos el resultado
+        final doc = await transaction.get(docRef);
+        final defaultData = await _getDefaultNutritionData();
+        final data = doc.exists ? doc.data()! : defaultData;
 
         // Actualizar los datos
         final meals = List<Map<String, dynamic>>.from(data['meals'] ?? []);
@@ -248,19 +387,20 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
             (data['calories']['consumed'] ?? 0) + food.calories;
         data['meals'] = meals;
 
-        // Guardar en Firestore
-        await docRef.set(data);
-
         transaction.set(docRef, data);
       });
 
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Alimento agregado exitosamente')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Alimento agregado exitosamente')),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error al agregar alimento: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al agregar alimento: $e')),
+        );
+      }
     }
   }
 
@@ -371,7 +511,31 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
               children: [
                 _buildMacrosSummary(data),
                 ..._buildMealSections(meals),
-                SizedBox(height: 80),
+                SizedBox(height: 80), 
+                // Nueva sección de ejercicios
+                Divider(thickness: 1),
+                Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Ejercicios del día',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 10, 10, 10), // Color de tu app
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.add, color: Color.fromARGB(255, 0, 115, 119)),
+                        onPressed: _showAddExerciseDialog,
+                      ),
+                    ],
+                  ),
+                ),
+                _buildExerciseList(), // Widget que mostrará la lista
+                SizedBox(height: 24), 
               ],
             ),
           ),
@@ -975,6 +1139,113 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
     }
   }
 
+  // Método para agregar un ejercicio a Firestore
+  Future<void> _addExercise(Exercise exercise) async {
+    try {
+      final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+      final docRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.clientId)
+          .collection('workouts')
+          .doc(dateStr);
+
+      await docRef.set({
+        'exercises': FieldValue.arrayUnion([exercise.toMap()]),
+      }, SetOptions(merge: true));
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ejercicio agregado exitosamente')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al agregar ejercicio: $e')),
+        );
+      }
+    }
+  }
+
+  // Método para mostrar el diálogo
+  Future<void> _showAddExerciseDialog() async {
+    await showDialog(
+      context: context,
+      builder:
+          (context) =>
+              AddExerciseDialog(onAdd: (exercise) => _addExercise(exercise)),
+    );
+  }
+
+  Widget _buildExerciseList() {
+    final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    return StreamBuilder<DocumentSnapshot>(
+      stream:
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.clientId)
+              .collection('workouts')
+              .doc(dateStr)
+              .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return Center(child: Text('No hay ejercicios registrados hoy'));
+        }
+
+        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final exercises =
+            (data['exercises'] as List<dynamic>?)
+                ?.map((e) => Exercise.fromMap(e))
+                .toList() ??
+            [];
+
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: exercises.length,
+          itemBuilder: (context, index) {
+            final exercise = exercises[index];
+            return ListTile(
+              title: Text(exercise.name),
+              subtitle: Text(
+                '${exercise.sets}x${exercise.reps} ${exercise.notes != null ? " - ${exercise.notes}" : ""}',
+              ),
+              trailing: IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () => _deleteExercise(dateStr, exercise),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteExercise(String dateStr, Exercise exercise) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.clientId)
+          .collection('workouts')
+          .doc(dateStr)
+          .update({
+            'exercises': FieldValue.arrayRemove([exercise.toMap()]),
+          });
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Ejercicio eliminado')));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al eliminar: $e')));
+      }
+    }
+  }
+
   // Asegurar que el método _buildMealSummary maneje valores nulos
   Widget _buildMealSummary(Map<String, dynamic> meal) {
     return Container(
@@ -1034,7 +1305,51 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
     await showDialog(
       context: context,
       builder: (context) {
-        return AddFoodDialog(onAdd: (food) => _addFoodToMeal(mealName, food));
+        return AlertDialog(
+          title: Text('Añadir alimento'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.search),
+                title: Text('Buscar alimento guardado'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showSearchFoodDialog(mealName);
+                },
+              ),
+              Divider(),
+              ListTile(
+                leading: Icon(Icons.add),
+                title: Text('Crear nuevo alimento'),
+                onTap: () {
+                  Navigator.pop(context);
+                  showDialog(
+                    context: context,
+                    builder:
+                        (context) => AddFoodDialog(
+                          onAdd: (food) async {
+                            // Guardar el alimento en la colección de alimentos guardados
+                            await FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(widget.clientId)
+                                .collection('saved_foods')
+                                .add(food.toMap());
+                            _addFoodToMeal(mealName, food);
+                          },
+                        ),
+                  );
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancelar'),
+            ),
+          ],
+        );
       },
     );
   }
