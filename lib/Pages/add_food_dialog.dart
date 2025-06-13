@@ -24,16 +24,81 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
   late TextEditingController _proteinController;
   late TextEditingController _fatsController;
 
+  // Valores base por 100g
+  double _baseCalories = 0;
+  double _baseCarbs = 0;
+  double _baseProtein = 0;
+  double _baseFats = 0;
+  bool _initialValuesSet = false;
+  String _lastQuantity = '';
+
   @override
   void initState() {
     super.initState();
-    // Inicializar los controladores con los valores del alimento existente (si hay)
     _nameController = TextEditingController(text: widget.initialFood?.name ?? '');
-    _quantityController = TextEditingController(text: widget.initialFood?.quantity ?? '');
-    _caloriesController = TextEditingController(text: widget.initialFood?.calories.toStringAsFixed(0) ?? '');
-    _carbsController = TextEditingController(text: widget.initialFood?.carbs.toStringAsFixed(0) ?? '');
-    _proteinController = TextEditingController(text: widget.initialFood?.protein.toStringAsFixed(0) ?? '');
-    _fatsController = TextEditingController(text: widget.initialFood?.fats.toStringAsFixed(0) ?? '');
+    _quantityController = TextEditingController(text: widget.initialFood?.quantity ?? '100g');
+    
+    // Inicializar valores base si estamos editando
+    if (widget.initialFood != null) {
+      _updateBaseValuesFromQuantity(widget.initialFood!);
+      _initialValuesSet = true;
+    }
+    
+    _caloriesController = TextEditingController(
+      text: widget.initialFood?.calories.toStringAsFixed(0) ?? ''
+    );
+    _carbsController = TextEditingController(
+      text: widget.initialFood?.carbs.toStringAsFixed(1) ?? ''
+    );
+    _proteinController = TextEditingController(
+      text: widget.initialFood?.protein.toStringAsFixed(1) ?? ''
+    );
+    _fatsController = TextEditingController(
+      text: widget.initialFood?.fats.toStringAsFixed(1) ?? ''
+    );
+
+    // Agregar listeners
+    _quantityController.addListener(_calculateNutrients);
+    
+    // Para nuevos alimentos
+    if (widget.initialFood == null) {
+      _caloriesController.addListener(_updateBaseValuesFromInput);
+      _carbsController.addListener(_updateBaseValuesFromInput);
+      _proteinController.addListener(_updateBaseValuesFromInput);
+      _fatsController.addListener(_updateBaseValuesFromInput);
+    }
+  }
+
+  void _updateBaseValuesFromQuantity(FoodItem food) {
+    // Extraer la cantidad numérica (ej. "200g" -> 200)
+    final quantity = double.tryParse(food.quantity.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 100;
+    final factor = 100 / quantity; // Factor inverso para obtener valores por 100g
+    
+    _baseCalories = food.calories * factor;
+    _baseCarbs = food.carbs * factor;
+    _baseProtein = food.protein * factor;
+    _baseFats = food.fats * factor;
+  }
+
+  void _updateBaseValuesFromInput() {
+    if (_quantityController.text.isEmpty) return;
+    
+    final quantity = double.tryParse(_quantityController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 100;
+    final factor = 100 / quantity;
+    
+    if (_caloriesController.text.isNotEmpty &&
+        _carbsController.text.isNotEmpty &&
+        _proteinController.text.isNotEmpty &&
+        _fatsController.text.isNotEmpty) {
+      
+      setState(() {
+        _baseCalories = (double.tryParse(_caloriesController.text) ?? 0) * factor;
+        _baseCarbs = (double.tryParse(_carbsController.text) ?? 0) * factor;
+        _baseProtein = (double.tryParse(_proteinController.text) ?? 0) * factor;
+        _baseFats = (double.tryParse(_fatsController.text) ?? 0) * factor;
+        _initialValuesSet = true;
+      });
+    }
   }
 
   @override
@@ -45,6 +110,21 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
     _proteinController.dispose();
     _fatsController.dispose();
     super.dispose();
+  }
+
+  void _calculateNutrients() {
+    if (!_initialValuesSet || _quantityController.text == _lastQuantity) return;
+    _lastQuantity = _quantityController.text;
+
+    final quantity = double.tryParse(_quantityController.text.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 100;
+    final factor = quantity / 100;
+
+    setState(() {
+      _caloriesController.text = (_baseCalories * factor).toStringAsFixed(0);
+      _carbsController.text = (_baseCarbs * factor).toStringAsFixed(1);
+      _proteinController.text = (_baseProtein * factor).toStringAsFixed(1);
+      _fatsController.text = (_baseFats * factor).toStringAsFixed(1);
+    });
   }
 
   @override
@@ -76,6 +156,11 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
                   }
                   return null;
                 },
+                onChanged: (value) {
+                  if (_initialValuesSet) {
+                    _calculateNutrients();
+                  }
+                },
               ),
               TextFormField(
                 controller: _caloriesController,
@@ -86,6 +171,11 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
                     return 'Por favor ingresa las calorías';
                   }
                   return null;
+                },
+                onChanged: (value) {
+                  if (widget.initialFood != null) {
+                    _updateBaseValuesFromInput();
+                  }
                 },
               ),
               TextFormField(
@@ -98,6 +188,11 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
                   }
                   return null;
                 },
+                onChanged: (value) {
+                  if (widget.initialFood != null) {
+                    _updateBaseValuesFromInput();
+                  }
+                },
               ),
               TextFormField(
                 controller: _proteinController,
@@ -109,6 +204,11 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
                   }
                   return null;
                 },
+                onChanged: (value) {
+                  if (widget.initialFood != null) {
+                    _updateBaseValuesFromInput();
+                  }
+                },
               ),
               TextFormField(
                 controller: _fatsController,
@@ -119,6 +219,11 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
                     return 'Por favor ingresa las grasas';
                   }
                   return null;
+                },
+                onChanged: (value) {
+                  if (widget.initialFood != null) {
+                    _updateBaseValuesFromInput();
+                  }
                 },
               ),
             ],

@@ -230,97 +230,54 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
   // Método para mostrar el diálogo de búsqueda
   Future<void> _showSearchFoodDialog(String mealName) async {
     final savedFoods = await _getSavedFoods();
-    String searchQuery = '';
-    List<FoodItem> filteredFoods = savedFoods;
 
-    await showDialog(
+    if (savedFoods.isEmpty) {
+      // Si no hay alimentos guardados, mostrar directamente el diálogo para crear uno nuevo
+      _showAddFoodDialog(mealName);
+      return;
+    }
+
+    final selectedFood = await showDialog<FoodItem>(
       context: context,
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text('Buscar alimento'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Buscar...',
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(),
+        return SimpleDialog(
+          title: Text('Selecciona un alimento'),
+          children: [
+            ...savedFoods
+                .map(
+                  (food) => SimpleDialogOption(
+                    onPressed: () => Navigator.pop(context, food),
+                    child: ListTile(
+                      title: Text(food.name),
+                      subtitle: Text(
+                        '${food.calories.toStringAsFixed(0)} kcal | '
+                        'C:${food.carbs.toStringAsFixed(0)}g '
+                        'P:${food.protein.toStringAsFixed(0)}g '
+                        'G:${food.fats.toStringAsFixed(0)}g',
                       ),
-                      onChanged: (value) {
-                        setState(() {
-                          searchQuery = value.toLowerCase();
-                          filteredFoods =
-                              savedFoods
-                                  .where(
-                                    (food) => food.name.toLowerCase().contains(
-                                      searchQuery,
-                                    ),
-                                  )
-                                  .toList();
-                        });
-                      },
                     ),
-                    SizedBox(height: 16),
-                    if (filteredFoods.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          searchQuery.isEmpty
-                              ? 'No hay alimentos guardados'
-                              : 'No se encontraron resultados',
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      )
-                    else
-                      Column(
-                        children:
-                            filteredFoods
-                                .map(
-                                  (food) => ListTile(
-                                    title: Text(food.name),
-                                    subtitle: Text(
-                                      '${food.calories.toStringAsFixed(0)} kcal | C:${food.carbs.toStringAsFixed(0)}g P:${food.protein.toStringAsFixed(0)}g G:${food.fats.toStringAsFixed(0)}g',
-                                    ),
-                                    trailing: IconButton(
-                                      icon: Icon(Icons.add),
-                                      onPressed: () {
-                                        Navigator.pop(context);
-                                        _addFoodToMeal(mealName, food);
-                                      },
-                                    ),
-                                    onTap: () {
-                                      Navigator.pop(context);
-                                      _addFoodToMeal(mealName, food);
-                                    },
-                                  ),
-                                )
-                                .toList(),
-                      ),
-                  ],
-                ),
+                  ),
+                )
+                .toList(),
+            Divider(),
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context);
+                _showAddFoodDialog(mealName);
+              },
+              child: ListTile(
+                leading: Icon(Icons.add),
+                title: Text('Crear nuevo alimento'),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Cancelar'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _showAddFoodDialog(mealName);
-                  },
-                  child: Text('Nuevo alimento'),
-                ),
-              ],
-            );
-          },
+            ),
+          ],
         );
       },
     );
+
+    if (selectedFood != null) {
+      _addFoodToMeal(mealName, selectedFood);
+    }
   }
 
   Future<void> _addFoodToMeal(String mealName, FoodItem food) async {
@@ -424,8 +381,160 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
     return Container(
       color: const Color(0xFFb51837),
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Puedes dejar espacio para otros elementos si los necesitas
+          SizedBox(width: 40), // Espacio equilibrado
+        ],
+      ),
     );
+  }
+
+  Future<void> _showMyFoodsDialog(String mealName) async {
+    final savedFoods = await _getSavedFoods();
+    String searchQuery = '';
+    List<FoodItem> filteredFoods = savedFoods;
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Mis Alimentos'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText: 'Buscar...',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value.toLowerCase();
+                          filteredFoods =
+                              savedFoods
+                                  .where(
+                                    (food) => food.name.toLowerCase().contains(
+                                      searchQuery,
+                                    ),
+                                  )
+                                  .toList();
+                        });
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    if (filteredFoods.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          searchQuery.isEmpty
+                              ? 'No hay alimentos guardados'
+                              : 'No se encontraron resultados',
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      )
+                    else
+                      Column(
+                        children:
+                            filteredFoods
+                                .map(
+                                  (food) => ListTile(
+                                    title: Text(food.name),
+                                    subtitle: Text(
+                                      '${food.calories.toStringAsFixed(0)} kcal | '
+                                      'C:${food.carbs.toStringAsFixed(0)}g '
+                                      'P:${food.protein.toStringAsFixed(0)}g '
+                                      'G:${food.fats.toStringAsFixed(0)}g',
+                                    ),
+                                    onTap: () {
+                                      Navigator.pop(
+                                        context,
+                                        food,
+                                      ); // Devuelve el alimento seleccionado
+                                    },
+                                    trailing: PopupMenuButton<String>(
+                                      icon: Icon(Icons.more_vert),
+                                      onSelected: (value) {
+                                        if (value == 'delete') {
+                                          _deleteSavedFood(food);
+                                          setState(() {
+                                            filteredFoods.remove(food);
+                                          });
+                                        }
+                                      },
+                                      itemBuilder:
+                                          (BuildContext context) => [
+                                            PopupMenuItem<String>(
+                                              value: 'delete',
+                                              child: Text('Eliminar'),
+                                            ),
+                                          ],
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                      ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cerrar'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    ).then((selectedFood) {
+      if (selectedFood != null && selectedFood is FoodItem) {
+        _addFoodToMeal(mealName, selectedFood);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${selectedFood.name} añadido a $mealName')),
+        );
+      }
+    });
+  }
+
+  Future<void> _deleteSavedFood(FoodItem food) async {
+    try {
+      // Buscar el documento que contiene este alimento
+      final query =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.clientId)
+              .collection('saved_foods')
+              .where('name', isEqualTo: food.name)
+              .limit(1)
+              .get();
+
+      if (query.docs.isNotEmpty) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.clientId)
+            .collection('saved_foods')
+            .doc(query.docs.first.id)
+            .delete();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Alimento eliminado de tus guardados')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al eliminar alimento: $e')),
+        );
+      }
+    }
   }
 
   Stream<DocumentSnapshot> get nutritionStream {
@@ -511,7 +620,7 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
               children: [
                 _buildMacrosSummary(data),
                 ..._buildMealSections(meals),
-                SizedBox(height: 80), 
+                SizedBox(height: 80),
                 // Nueva sección de ejercicios
                 Divider(thickness: 1),
                 Padding(
@@ -524,18 +633,26 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color.fromARGB(255, 10, 10, 10), // Color de tu app
+                          color: Color.fromARGB(
+                            255,
+                            10,
+                            10,
+                            10,
+                          ), // Color de tu app
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.add, color: Color.fromARGB(255, 0, 115, 119)),
+                        icon: Icon(
+                          Icons.add,
+                          color: Color.fromARGB(255, 0, 115, 119),
+                        ),
                         onPressed: _showAddExerciseDialog,
                       ),
                     ],
                   ),
                 ),
                 _buildExerciseList(), // Widget que mostrará la lista
-                SizedBox(height: 24), 
+                SizedBox(height: 24),
               ],
             ),
           ),
@@ -794,6 +911,28 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
                       'Añadir alimento',
                       style: TextStyle(
                         color: Colors.teal,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: 8,
+              ), // Padding solo abajo para separar del resumen
+              child: TextButton(
+                onPressed: () => _showMyFoodsDialog(safeMeal['name']?.toString() ?? 'Comida'),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.fastfood, color: Colors.black, size: 16),
+                    SizedBox(width: 4),
+                    Text(
+                      'Mis Alimentos',
+                      style: TextStyle(
+                        color: Colors.black,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -1304,53 +1443,19 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
   Future<void> _showAddFoodDialog(String mealName) async {
     await showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Añadir alimento'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(Icons.search),
-                title: Text('Buscar alimento guardado'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _showSearchFoodDialog(mealName);
-                },
-              ),
-              Divider(),
-              ListTile(
-                leading: Icon(Icons.add),
-                title: Text('Crear nuevo alimento'),
-                onTap: () {
-                  Navigator.pop(context);
-                  showDialog(
-                    context: context,
-                    builder:
-                        (context) => AddFoodDialog(
-                          onAdd: (food) async {
-                            // Guardar el alimento en la colección de alimentos guardados
-                            await FirebaseFirestore.instance
-                                .collection('users')
-                                .doc(widget.clientId)
-                                .collection('saved_foods')
-                                .add(food.toMap());
-                            _addFoodToMeal(mealName, food);
-                          },
-                        ),
-                  );
-                },
-              ),
-            ],
+      builder:
+          (context) => AddFoodDialog(
+            onAdd: (food) async {
+              // Primero guardar el alimento en la colección de alimentos guardados
+              await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(widget.clientId)
+                  .collection('saved_foods')
+                  .add(food.toMap());
+              // Luego añadirlo a la comida actual
+              _addFoodToMeal(mealName, food);
+            },
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Cancelar'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
