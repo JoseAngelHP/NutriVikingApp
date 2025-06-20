@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nutri_viking_app/Pages/Exercise.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AddExerciseDialog extends StatefulWidget {
   final Function(Exercise) onAdd;
@@ -17,41 +18,36 @@ class AddExerciseDialog extends StatefulWidget {
 
 class _AddExerciseDialogState extends State<AddExerciseDialog> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _nameController;
-  late TextEditingController _repsController;
-  late TextEditingController _setsController;
-  late TextEditingController _notesController;
+  late TextEditingController _pdfUrlController;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(
-      text: widget.initialExercise?.name ?? '',
-    );
-    _repsController = TextEditingController(
-      text: widget.initialExercise?.reps.toString() ?? '',
-    );
-    _setsController = TextEditingController(
-      text: widget.initialExercise?.sets.toString() ?? '',
-    );
-    _notesController = TextEditingController(
-      text: widget.initialExercise?.notes ?? '',
+    _pdfUrlController = TextEditingController(
+      text: widget.initialExercise?.pdfUrl ?? '',
     );
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _repsController.dispose();
-    _setsController.dispose();
-    _notesController.dispose();
+    _pdfUrlController.dispose();
     super.dispose();
+  }
+
+  Future<void> _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No se pudo abrir la URL: $url')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.initialExercise == null ? 'Añadir Ejercicio' : 'Editar Ejercicio'),
+      title: Text('Agregar PDF'),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -59,53 +55,35 @@ class _AddExerciseDialogState extends State<AddExerciseDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(labelText: 'Nombre del ejercicio'),
+                controller: _pdfUrlController,
+                decoration: InputDecoration(
+                  labelText: 'URL del PDF',
+                  hintText: 'https://ejemplo.com/ejercicio.pdf',
+                  prefixIcon: Icon(Icons.link),
+                ),
+                keyboardType: TextInputType.url,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Ingresa un nombre';
+                    return 'Ingresa la URL del PDF';
+                  }
+                  if (!value.startsWith('http://') && !value.startsWith('https://')) {
+                    return 'La URL debe comenzar con http:// o https://';
                   }
                   return null;
                 },
               ),
-              SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _repsController,
-                      decoration: InputDecoration(labelText: 'Repeticiones'),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Ingresa repeticiones';
-                        }
-                        return null;
-                      },
+              SizedBox(height: 16),
+              if (_pdfUrlController.text.isNotEmpty)
+                InkWell(
+                  onTap: () => _launchURL(_pdfUrlController.text),
+                  child: Text(
+                    'Previsualizar PDF',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      decoration: TextDecoration.underline,
                     ),
                   ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _setsController,
-                      decoration: InputDecoration(labelText: 'Series'),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Ingresa series';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 12),
-              TextFormField(
-                controller: _notesController,
-                decoration: InputDecoration(labelText: 'Notas (opcional)'),
-                maxLines: 2,
-              ),
+                ),
             ],
           ),
         ),
@@ -119,10 +97,11 @@ class _AddExerciseDialogState extends State<AddExerciseDialog> {
           onPressed: () {
             if (_formKey.currentState!.validate()) {
               final exercise = Exercise(
-                name: _nameController.text,
-                reps: int.parse(_repsController.text),
-                sets: int.parse(_setsController.text),
-                notes: _notesController.text.isNotEmpty ? _notesController.text : null,
+                pdfUrl: _pdfUrlController.text,
+                // Mantenemos los otros campos vacíos o con valores por defecto
+                name: '',
+                //reps: 0,
+                //sets: 0,
               );
               widget.onAdd(exercise);
               Navigator.pop(context);

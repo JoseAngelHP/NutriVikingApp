@@ -7,6 +7,8 @@ class FoodItem {
   final double carbs;
   final double protein;
   final double fats;
+  final double? sodium; // Nuevo campo opcional
+  final double? potassium; // Nuevo campo opcional
 
   FoodItem({
     required this.id,
@@ -16,6 +18,8 @@ class FoodItem {
     required this.carbs,
     required this.protein,
     required this.fats,
+    this.sodium, // Opcional
+    this.potassium, // Opcional
   });
 
   Map<String, dynamic> toMap() {
@@ -27,6 +31,8 @@ class FoodItem {
       'carbs': carbs,
       'protein': protein,
       'fats': fats,
+      'sodium': sodium, // Incluido en el mapa
+      'potassium': potassium, // Incluido en el mapa
     };
   }
 
@@ -39,6 +45,8 @@ class FoodItem {
       carbs: (map['carbs'] ?? 0).toDouble(),
       protein: (map['protein'] ?? 0).toDouble(),
       fats: (map['fats'] ?? 0).toDouble(),
+      sodium: map['sodium']?.toDouble(), // Conversión nullable
+      potassium: map['potassium']?.toDouble(), // Conversión nullable
     );
   }
 }
@@ -60,6 +68,16 @@ class Meal {
   double get totalCarbs => items.fold(0, (sum, item) => sum + item.carbs);
   double get totalProtein => items.fold(0, (sum, item) => sum + item.protein);
   double get totalFats => items.fold(0, (sum, item) => sum + item.fats);
+  // Nuevos getters opcionales para sodio y potasio
+  double? get totalSodium {
+    final values = items.where((item) => item.sodium != null).map((item) => item.sodium!);
+    return values.isEmpty ? null : values.reduce((sum, sodium) => sum + sodium);
+  }
+  
+  double? get totalPotassium {
+    final values = items.where((item) => item.potassium != null).map((item) => item.potassium!);
+    return values.isEmpty ? null : values.reduce((sum, potassium) => sum + potassium);
+  }
 
   Map<String, dynamic> toMap() {
     return {

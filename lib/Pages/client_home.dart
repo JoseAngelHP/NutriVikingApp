@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ClientHomeScreen extends StatelessWidget {
   final String userId;
@@ -28,12 +29,20 @@ class ClientHomeScreen extends StatelessWidget {
           ],
           bottom: TabBar(
             indicatorColor: Colors.white,
-            labelColor: Colors.white, // Color del texto de la pestaña seleccionada
-            unselectedLabelColor: Colors.white70, // Color del texto de pestañas no seleccionadas
+            labelColor:
+                Colors.white, // Color del texto de la pestaña seleccionada
+            unselectedLabelColor:
+                Colors.white70, // Color del texto de pestañas no seleccionadas
             labelStyle: TextStyle(fontWeight: FontWeight.bold),
             tabs: [
-              Tab(icon: Icon(Icons.fastfood, color: Colors.white), text: 'Alimentación'),
-              Tab(icon: Icon(Icons.fitness_center, color: Colors.white), text: 'Ejercicios'),
+              Tab(
+                icon: Icon(Icons.fastfood, color: Colors.white),
+                text: 'Alimentación',
+              ),
+              Tab(
+                icon: Icon(Icons.fitness_center, color: Colors.white),
+                text: 'Ejercicios',
+              ),
             ],
           ),
         ),
@@ -121,36 +130,57 @@ class ClientHomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  exercise['name'] ?? 'Ejercicio',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Series: ${exercise['sets'] ?? '0'}',
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                    Text(
-                      'Repeticiones: ${exercise['reps'] ?? '0'}',
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                  ],
-                ),
-                if (exercise['notes'] != null &&
-                    exercise['notes'].toString().isNotEmpty)
-                  Padding(
-                    padding: EdgeInsets.only(top: 8),
-                    child: Text(
-                      'Notas: ${exercise['notes']}',
-                      style: TextStyle(color: Colors.white54, fontSize: 14),
-                    ),
+                // Sección para el PDF con manejo seguro del contexto
+                if (exercise['pdfUrl'] != null &&
+                    exercise['pdfUrl'].toString().isNotEmpty)
+                  Builder(
+                    builder:
+                        (context) => Padding(
+                          padding: EdgeInsets.only(top: 12),
+                          child: InkWell(
+                            onTap: () async {
+                              final url = exercise['pdfUrl'];
+                              try {
+                                if (await canLaunch(url)) {
+                                  await launch(url);
+                                } else {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'No se pudo abrir el PDF',
+                                        ),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Error: $e'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            child: Row(
+                              children: [
+                                Icon(Icons.picture_as_pdf, color: Colors.red),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Ver PDF',
+                                  style: TextStyle(
+                                    color: Colors.blue,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                   ),
               ],
             ),

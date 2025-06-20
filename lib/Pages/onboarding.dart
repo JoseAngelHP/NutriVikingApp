@@ -27,17 +27,17 @@ class _OnboardingState extends State<Onboarding> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              "assets/iconstart.png",
+              "assets/logoviking.png",
               color: Colors.white,
-              height: 90,
-              width: 90,
+              height: 200,
+              width: 200,
               fit: BoxFit.cover,
             ),
-            Text(
+            /*Text(
               "Viking Fitness",
               style: TextStyle(color: Colors.white, fontSize: 30.0),
-            ),
-            SizedBox(height: 80.0),
+            ),*/
+            SizedBox(height: 50.0),
             Text(
               "¡Bienvenido!",
               style: TextStyle(

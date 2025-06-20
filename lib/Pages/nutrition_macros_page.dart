@@ -6,6 +6,7 @@ import 'package:nutri_viking_app/Pages/Exercise.dart';
 import 'package:nutri_viking_app/Pages/add_exercise_dialog.dart';
 import 'food_model.dart';
 import 'add_food_dialog.dart';
+import 'dart:math';
 
 class NutritionMacrosPage extends StatefulWidget {
   final String clientId;
@@ -207,17 +208,14 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
     try {
       final querySnapshot =
           await FirebaseFirestore.instance
-              .collection('users')
-              .doc(widget.clientId)
-              .collection('saved_foods')
+              .collection('saved_foods') // Colección global
               .get();
 
       // Elimina duplicados por nombre (opcional)
       final uniqueFoods = <String, FoodItem>{};
       for (var doc in querySnapshot.docs) {
         final food = FoodItem.fromMap(doc.data());
-        uniqueFoods[food.name] =
-            food; // Esto asegura que no haya duplicados por nombre
+        uniqueFoods[food.name] = food;
       }
 
       return uniqueFoods.values.toList();
@@ -292,9 +290,7 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
       // Primero verifica si el alimento ya existe en saved_foods
       final existingFoodQuery =
           await FirebaseFirestore.instance
-              .collection('users')
-              .doc(widget.clientId)
-              .collection('saved_foods')
+              .collection('saved_foods') // Colección global
               .where('name', isEqualTo: food.name)
               .limit(1)
               .get();
@@ -302,9 +298,7 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
       // Si no existe, lo guardamos en saved_foods
       if (existingFoodQuery.docs.isEmpty) {
         await FirebaseFirestore.instance
-            .collection('users')
-            .doc(widget.clientId)
-            .collection('saved_foods')
+            .collection('saved_foods') // Colección global
             .add(food.toMap());
       }
 
@@ -390,6 +384,187 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
       ),
     );
   }
+
+  Future<void> copyMealsSimple(String mealName) async {
+    // 1. Obtener todos los clientes (sin filtro de coach)
+    final query = await FirebaseFirestore.instance.collection('users').get();
+
+    // 2. Mostrar diálogo simple de selección
+    final selectedClient = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder:
+          (context) => SimpleDialog(
+            title: Text('Seleccionar cliente origen'),
+            children:
+                query.docs.map((doc) {
+                  final data = doc.data();
+                  return SimpleDialogOption(
+                    onPressed:
+                        () => Navigator.pop(context, {
+                          'id': doc.id,
+                          'name': data['name'] ?? 'Sin nombre',
+                        }),
+                    child: Text(data['name'] ?? doc.id),
+                  );
+                }).toList(),
+          ),
+    );
+
+    if (selectedClient != null) {
+      // 3. Copiar directamente
+      await _copyMealsFromClient(
+        selectedClient['id'],
+        selectedClient['name'],
+        _selectedDate, // Usa la fecha actual seleccionada
+        mealName,
+      );
+    }
+  }
+
+  Future<void> _copyMealsFromClient(
+  String sourceClientId,
+  String sourceClientName,
+  DateTime sourceDate,
+  String mealName,
+) async {
+  try {
+    final sourceDateStr = DateFormat('yyyy-MM-dd').format(sourceDate);
+    final currentDateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+
+    // Obtener datos de origen
+    final sourceDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(sourceClientId)
+        .collection('nutrition')
+        .doc(sourceDateStr)
+        .get();
+
+    if (!sourceDoc.exists) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No hay datos para copiar')),
+        );
+      }
+      return;
+    }
+
+    final sourceData = sourceDoc.data()!;
+    final sourceMeals = List<Map<String, dynamic>>.from(sourceData['meals'] ?? []);
+    final sourceMeal = sourceMeals.firstWhere(
+      (m) => m['name'] == mealName,
+      orElse: () => {},
+    );
+
+    if (sourceMeal.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No se encontró la comida $mealName')),
+        );
+      }
+      return;
+    }
+
+    // Obtener referencia al documento destino
+    final currentDocRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.clientId)
+        .collection('nutrition')
+        .doc(currentDateStr);
+
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final currentDoc = await transaction.get(currentDocRef);
+      final currentData = currentDoc.exists 
+          ? Map<String, dynamic>.from(currentDoc.data()!) 
+          : await _getDefaultNutritionData();
+
+      // Actualizar comidas
+      final currentMeals = List<Map<String, dynamic>>.from(currentData['meals'] ?? []);
+      final targetMealIndex = currentMeals.indexWhere((m) => m['name'] == mealName);
+
+      // Calcular diferencias para actualizar los totales
+      double carbsToAdd = 0;
+      double proteinToAdd = 0;
+      double fatsToAdd = 0;
+      double caloriesToAdd = 0;
+
+      if (targetMealIndex != -1) {
+        // Si la comida existe, combinar items
+        final targetMeal = Map<String, dynamic>.from(currentMeals[targetMealIndex]);
+        final targetItems = List<Map<String, dynamic>>.from(targetMeal['items'] ?? []);
+        final sourceItems = List<Map<String, dynamic>>.from(sourceMeal['items'] ?? []);
+        
+        // Calcular los valores a agregar
+        for (final item in sourceItems) {
+          carbsToAdd += (item['carbs'] ?? 0).toDouble();
+          proteinToAdd += (item['protein'] ?? 0).toDouble();
+          fatsToAdd += (item['fats'] ?? 0).toDouble();
+          caloriesToAdd += (item['calories'] ?? 0).toDouble();
+        }
+        
+        targetItems.addAll(sourceItems);
+        
+        // Actualizar la comida
+        targetMeal['items'] = targetItems;
+        targetMeal['carbsConsumed'] = (targetMeal['carbsConsumed'] ?? 0) + carbsToAdd;
+        targetMeal['proteinConsumed'] = (targetMeal['proteinConsumed'] ?? 0) + proteinToAdd;
+        targetMeal['fatsConsumed'] = (targetMeal['fatsConsumed'] ?? 0) + fatsToAdd;
+        targetMeal['caloriesConsumed'] = (targetMeal['caloriesConsumed'] ?? 0) + caloriesToAdd;
+        
+        currentMeals[targetMealIndex] = targetMeal;
+      } else {
+        // Si la comida no existe, agregarla completa
+        currentMeals.add(sourceMeal);
+        
+        // Sumar todos los valores de la comida nueva
+        final items = List<Map<String, dynamic>>.from(sourceMeal['items'] ?? []);
+        for (final item in items) {
+          carbsToAdd += (item['carbs'] ?? 0).toDouble();
+          proteinToAdd += (item['protein'] ?? 0).toDouble();
+          fatsToAdd += (item['fats'] ?? 0).toDouble();
+          caloriesToAdd += (item['calories'] ?? 0).toDouble();
+        }
+      }
+
+      // Actualizar los totales generales
+      currentData['carbs'] = {
+        'consumed': (currentData['carbs']['consumed'] ?? 0) + carbsToAdd,
+        'total': currentData['carbs']['total'] ?? 0,
+      };
+      
+      currentData['protein'] = {
+        'consumed': (currentData['protein']['consumed'] ?? 0) + proteinToAdd,
+        'total': currentData['protein']['total'] ?? 0,
+      };
+      
+      currentData['fats'] = {
+        'consumed': (currentData['fats']['consumed'] ?? 0) + fatsToAdd,
+        'total': currentData['fats']['total'] ?? 0,
+      };
+      
+      currentData['calories'] = {
+        'consumed': (currentData['calories']['consumed'] ?? 0) + caloriesToAdd,
+        'total': currentData['calories']['total'] ?? 0,
+      };
+      
+      currentData['meals'] = currentMeals;
+
+      transaction.set(currentDocRef, currentData);
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Comida copiada exitosamente')),
+      );
+      setState(() {}); // Refrescar la vista
+    }
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al copiar: $e')),
+      );
+    }
+  }
+}
 
   Future<void> _showMyFoodsDialog(String mealName) async {
     final savedFoods = await _getSavedFoods();
@@ -507,24 +682,20 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
       // Buscar el documento que contiene este alimento
       final query =
           await FirebaseFirestore.instance
-              .collection('users')
-              .doc(widget.clientId)
-              .collection('saved_foods')
+              .collection('saved_foods') // Colección global
               .where('name', isEqualTo: food.name)
               .limit(1)
               .get();
 
       if (query.docs.isNotEmpty) {
         await FirebaseFirestore.instance
-            .collection('users')
-            .doc(widget.clientId)
-            .collection('saved_foods')
+            .collection('saved_foods') // Colección global
             .doc(query.docs.first.id)
             .delete();
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Alimento eliminado de tus guardados')),
+            SnackBar(content: Text('Alimento eliminado de la base compartida')),
           );
         }
       }
@@ -876,6 +1047,16 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
                 safeMeal['name']?.toString() ?? 'Comida',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
               ),
+              trailing: PopupMenuButton<String>(
+                itemBuilder:
+                    (context) => [
+                      PopupMenuItem(
+                        value: 'copy',
+                        child: Text('Copiar comida de otro usuario'),
+                      ),
+                    ],
+                onSelected: (_) => copyMealsSimple(safeMeal['name']),
+              ),
               /*trailing: IconButton(
                 icon: Icon(Icons.more_vert, color: Colors.grey),
                 onPressed: () {},
@@ -923,7 +1104,10 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
                 bottom: 8,
               ), // Padding solo abajo para separar del resumen
               child: TextButton(
-                onPressed: () => _showMyFoodsDialog(safeMeal['name']?.toString() ?? 'Comida'),
+                onPressed:
+                    () => _showMyFoodsDialog(
+                      safeMeal['name']?.toString() ?? 'Comida',
+                    ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -1098,76 +1282,75 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
   }
 
   Future<void> _deleteFoodItem(
-    String mealName,
-    int index,
-    Map<String, dynamic> foodItem,
-  ) async {
-    try {
-      final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
-      final docRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.clientId)
-          .collection('nutrition')
-          .doc(dateStr);
+  String mealName,
+  int index,
+  Map<String, dynamic> foodItem,
+) async {
+  try {
+    final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    final docRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.clientId)
+        .collection('nutrition')
+        .doc(dateStr);
 
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final doc = await transaction.get(docRef);
-        if (!doc.exists) return;
+    await FirebaseFirestore.instance.runTransaction((transaction) async {
+      final doc = await transaction.get(docRef);
+      if (!doc.exists) return;
 
-        final data = doc.data()!;
-        final meals = List<Map<String, dynamic>>.from(data['meals'] ?? []);
-        final mealIndex = meals.indexWhere((m) => m['name'] == mealName);
+      final data = doc.data()!;
+      final meals = List<Map<String, dynamic>>.from(data['meals'] ?? []);
+      final mealIndex = meals.indexWhere((m) => m['name'] == mealName);
 
-        if (mealIndex != -1) {
-          final meal = Map<String, dynamic>.from(meals[mealIndex]);
-          final items = List<Map<String, dynamic>>.from(meal['items'] ?? []);
+      if (mealIndex != -1) {
+        final meal = Map<String, dynamic>.from(meals[mealIndex]);
+        final items = List<Map<String, dynamic>>.from(meal['items'] ?? []);
 
-          if (index < items.length) {
-            // Restar los valores nutricionales
-            meal['carbsConsumed'] =
-                (meal['carbsConsumed'] ?? 0) - (foodItem['carbs'] ?? 0);
-            meal['proteinConsumed'] =
-                (meal['proteinConsumed'] ?? 0) - (foodItem['protein'] ?? 0);
-            meal['fatsConsumed'] =
-                (meal['fatsConsumed'] ?? 0) - (foodItem['fats'] ?? 0);
-            meal['caloriesConsumed'] =
-                (meal['caloriesConsumed'] ?? 0) - (foodItem['calories'] ?? 0);
+        if (index < items.length) {
+          final food = items[index];
+          
+          // Obtener valores nutricionales (asegurando que no sean nulos)
+          final carbs = (food['carbs'] ?? 0).toDouble();
+          final protein = (food['protein'] ?? 0).toDouble();
+          final fats = (food['fats'] ?? 0).toDouble();
+          final calories = (food['calories'] ?? 0).toDouble();
 
-            // Eliminar el alimento
-            items.removeAt(index);
-            meal['items'] = items;
-            meals[mealIndex] = meal;
+          // Actualizar la comida (con prevención de valores negativos)
+          meal['carbsConsumed'] = max(0, (meal['carbsConsumed'] ?? 0) - carbs);
+          meal['proteinConsumed'] = max(0, (meal['proteinConsumed'] ?? 0) - protein);
+          meal['fatsConsumed'] = max(0, (meal['fatsConsumed'] ?? 0) - fats);
+          meal['caloriesConsumed'] = max(0, (meal['caloriesConsumed'] ?? 0) - calories);
 
-            // Actualizar totales generales
-            data['carbs']['consumed'] =
-                (data['carbs']['consumed'] ?? 0) - (foodItem['carbs'] ?? 0);
-            data['protein']['consumed'] =
-                (data['protein']['consumed'] ?? 0) - (foodItem['protein'] ?? 0);
-            data['fats']['consumed'] =
-                (data['fats']['consumed'] ?? 0) - (foodItem['fats'] ?? 0);
-            data['calories']['consumed'] =
-                (data['calories']['consumed'] ?? 0) -
-                (foodItem['calories'] ?? 0);
-            data['meals'] = meals;
+          // Eliminar el alimento
+          items.removeAt(index);
+          meal['items'] = items;
+          meals[mealIndex] = meal;
 
-            transaction.update(docRef, data);
-          }
+          // Actualizar totales generales (con prevención de valores negativos)
+          data['carbs']['consumed'] = max(0, (data['carbs']['consumed'] ?? 0) - carbs);
+          data['protein']['consumed'] = max(0, (data['protein']['consumed'] ?? 0) - protein);
+          data['fats']['consumed'] = max(0, (data['fats']['consumed'] ?? 0) - fats);
+          data['calories']['consumed'] = max(0, (data['calories']['consumed'] ?? 0) - calories);
+          data['meals'] = meals;
+
+          transaction.update(docRef, data);
         }
-      });
+      }
+    });
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Alimento eliminado exitosamente')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al eliminar alimento: $e')),
-        );
-      }
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Alimento eliminado exitosamente')),
+      );
+    }
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al eliminar alimento: $e')),
+      );
     }
   }
+}
 
   Future<void> _editFoodItem(
     String mealName,
@@ -1345,9 +1528,11 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
           itemBuilder: (context, index) {
             final exercise = exercises[index];
             return ListTile(
-              title: Text(exercise.name),
-              subtitle: Text(
-                '${exercise.sets}x${exercise.reps} ${exercise.notes != null ? " - ${exercise.notes}" : ""}',
+              title: Text(
+                'Ejercicios Guardados',
+                style: TextStyle(
+                  color: Colors.black, // Opcional: color personalizado
+                ),
               ),
               trailing: IconButton(
                 icon: Icon(Icons.delete),

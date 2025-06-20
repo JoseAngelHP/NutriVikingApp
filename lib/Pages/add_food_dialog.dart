@@ -23,6 +23,8 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
   late TextEditingController _carbsController;
   late TextEditingController _proteinController;
   late TextEditingController _fatsController;
+  late TextEditingController _sodiumController; // Nuevo controlador para sodio
+  late TextEditingController _potassiumController; // Nuevo controlador para potasio
 
   // Valores base por 100g
   double _baseCalories = 0;
@@ -55,6 +57,13 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
     );
     _fatsController = TextEditingController(
       text: widget.initialFood?.fats.toStringAsFixed(1) ?? ''
+    );
+    // Nuevos controladores con valores iniciales
+    _sodiumController = TextEditingController(
+      text: widget.initialFood?.sodium?.toStringAsFixed(1) ?? ''
+    );
+    _potassiumController = TextEditingController(
+      text: widget.initialFood?.potassium?.toStringAsFixed(1) ?? ''
     );
 
     // Agregar listeners
@@ -109,6 +118,8 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
     _carbsController.dispose();
     _proteinController.dispose();
     _fatsController.dispose();
+    _sodiumController.dispose(); // Dispose del nuevo controlador
+    _potassiumController.dispose(); // Dispose del nuevo controlador
     super.dispose();
   }
 
@@ -226,6 +237,17 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
                   }
                 },
               ),
+              // Nuevos campos para sodio y potasio
+              TextFormField(
+                controller: _sodiumController,
+                decoration: InputDecoration(labelText: 'Sodio (mg) (opcional)'),
+                keyboardType: TextInputType.number,
+              ),
+              TextFormField(
+                controller: _potassiumController,
+                decoration: InputDecoration(labelText: 'Potasio (mg) (opcional)'),
+                keyboardType: TextInputType.number,
+              ),
             ],
           ),
         ),
@@ -253,6 +275,8 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
         carbs: double.parse(_carbsController.text),
         protein: double.parse(_proteinController.text),
         fats: double.parse(_fatsController.text),
+        sodium: _sodiumController.text.isNotEmpty ? double.tryParse(_sodiumController.text) : null,
+        potassium: _potassiumController.text.isNotEmpty ? double.tryParse(_potassiumController.text) : null,
       );
       widget.onAdd(newFood);
     }
