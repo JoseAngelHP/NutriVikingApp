@@ -25,6 +25,7 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
   late TextEditingController _fatsController;
   late TextEditingController _sodiumController; // Nuevo controlador para sodio
   late TextEditingController _potassiumController; // Nuevo controlador para potasio
+  late TextEditingController _brandController; // Nuevo controlador para la marca
 
   // Valores base por 100g
   double _baseCalories = 0;
@@ -39,6 +40,7 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
     super.initState();
     _nameController = TextEditingController(text: widget.initialFood?.name ?? '');
     _quantityController = TextEditingController(text: widget.initialFood?.quantity ?? '100g');
+    _brandController = TextEditingController(text: widget.initialFood?.brand ?? ''); // Inicializar controlador de marca
     
     // Inicializar valores base si estamos editando
     if (widget.initialFood != null) {
@@ -120,6 +122,7 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
     _fatsController.dispose();
     _sodiumController.dispose(); // Dispose del nuevo controlador
     _potassiumController.dispose(); // Dispose del nuevo controlador
+    _brandController.dispose(); // Dispose del controlador de marca
     super.dispose();
   }
 
@@ -157,6 +160,10 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
                   }
                   return null;
                 },
+              ),
+              TextFormField(
+                controller: _brandController, // Campo para la marca
+                decoration: InputDecoration(labelText: 'Marca (opcional)'),
               ),
               TextFormField(
                 controller: _quantityController,
@@ -277,6 +284,7 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
         fats: double.parse(_fatsController.text),
         sodium: _sodiumController.text.isNotEmpty ? double.tryParse(_sodiumController.text) : null,
         potassium: _potassiumController.text.isNotEmpty ? double.tryParse(_potassiumController.text) : null,
+        brand: _brandController.text.isNotEmpty ? _brandController.text : null, // Añadir la marca
       );
       widget.onAdd(newFood);
     }

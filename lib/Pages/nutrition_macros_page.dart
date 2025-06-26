@@ -30,12 +30,274 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
   DateTime _selectedDate = DateTime.now();
   final String _selectedPeriod = 'Día';
   List<String> _mealTypes = [];
+  // 1. Primero, añade estas variables al estado de tu clase
+  List<String> _savedMenus = []; // Lista de nombres de menús guardados
+  String? _selectedMenu; // Menú seleccionado actualmente
 
   @override
   void initState() {
     super.initState();
     _nutritionData = _loadNutritionDataForDate(_selectedDate);
     _loadCustomMeals(); // Cargar comidas personalizadas primero
+    _loadSavedMenus(); // Cargar menús guardados
+  }
+
+  // 2. Añade este método para cargar los menús guardados
+  Future<void> _loadSavedMenus() async {
+    try {
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.clientId)
+              .get();
+
+      if (doc.exists && doc.data()?.containsKey('savedMenus') == true) {
+        setState(() {
+          _savedMenus = List<String>.from(doc.data()!['savedMenus']);
+        });
+      }
+    } catch (e) {
+      print('Error cargando menús guardados: $e');
+    }
+  }
+
+  // 3. Método para guardar el menú actual como un nuevo menú
+  Future<void> _saveCurrentMenuAs(String menuName) async {
+    if (menuName.isEmpty) return;
+
+    try {
+      // Obtener los datos de nutrición actuales
+      final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+      final doc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.clientId)
+              .collection('nutrition')
+              .doc(dateStr)
+              .get();
+
+      if (doc.exists) {
+        final data = doc.data()!;
+
+        // Guardar el menú en la colección de menús
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.clientId)
+            .collection('saved_menus')
+            .doc(menuName)
+            .set(data);
+
+        // Actualizar la lista de menús guardados
+        if (!_savedMenus.contains(menuName)) {
+          setState(() {
+            _savedMenus.add(menuName);
+          });
+
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.clientId)
+              .set({
+                'savedMenus': FieldValue.arrayUnion([menuName]),
+              }, SetOptions(merge: true));
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Menú "$menuName" guardado exitosamente')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al guardar menú: $e')));
+      }
+    }
+  }
+
+  // 4. Método para cargar un menú guardado a la fecha seleccionada
+  Future<void> _loadMenuToDate(String menuName, DateTime date) async {
+    try {
+      final dateStr = DateFormat('yyyy-MM-dd').format(date);
+
+      // Obtener el menú guardado
+      final menuDoc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.clientId)
+              .collection('saved_menus')
+              .doc(menuName)
+              .get();
+
+      if (menuDoc.exists) {
+        // Copiar el menú a la fecha seleccionada
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.clientId)
+            .collection('nutrition')
+            .doc(dateStr)
+            .set(menuDoc.data()!);
+
+        setState(() {
+          _selectedMenu = menuName;
+          _nutritionData = _loadNutritionDataForDate(date);
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Menú "$menuName" cargado para $dateStr')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al cargar menú: $e')));
+      }
+    }
+  }
+
+  // Método para eliminar un menú guardado
+  Future<void> _deleteMenu(String menuName) async {
+    try {
+      // Mostrar confirmación antes de eliminar
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder:
+            (context) => AlertDialog(
+              title: Text('Eliminar menú'),
+              content: Text('¿Estás seguro de eliminar el menú "$menuName"?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: Text('Cancelar'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: Text('Eliminar', style: TextStyle(color: Colors.red)),
+                ),
+              ],
+            ),
+      );
+
+      if (confirm == true) {
+        // Eliminar de Firestore
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.clientId)
+            .collection('saved_menus')
+            .doc(menuName)
+            .delete();
+
+        // Actualizar la lista local
+        setState(() {
+          _savedMenus.remove(menuName);
+          if (_selectedMenu == menuName) {
+            _selectedMenu = null;
+          }
+        });
+
+        // Actualizar el array en el documento principal
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.clientId)
+            .update({
+              'savedMenus': FieldValue.arrayRemove([menuName]),
+            });
+
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Menú "$menuName" eliminado')));
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al eliminar menú: $e')));
+      }
+    }
+  }
+
+  // Método para renombrar un menú
+  Future<void> _renameMenu(String oldName) async {
+    final newNameController = TextEditingController(text: oldName);
+
+    final newName = await showDialog<String>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('Renombrar menú'),
+            content: TextField(
+              controller: newNameController,
+              decoration: InputDecoration(
+                labelText: 'Nuevo nombre',
+                hintText: 'Ej: Menú Vegetariano Semanal',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed:
+                    () => Navigator.pop(context, newNameController.text.trim()),
+                child: Text('Guardar'),
+              ),
+            ],
+          ),
+    );
+
+    if (newName != null && newName.isNotEmpty && newName != oldName) {
+      try {
+        // Obtener los datos del menú antiguo
+        final menuDoc =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(widget.clientId)
+                .collection('saved_menus')
+                .doc(oldName)
+                .get();
+
+        if (menuDoc.exists) {
+          // Crear nuevo menú con el nuevo nombre
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.clientId)
+              .collection('saved_menus')
+              .doc(newName)
+              .set(menuDoc.data()!);
+
+          // Eliminar el menú antiguo
+          await _deleteMenu(oldName);
+
+          // Actualizar la lista local
+          setState(() {
+            _savedMenus.remove(oldName);
+            _savedMenus.add(newName);
+            if (_selectedMenu == oldName) {
+              _selectedMenu = newName;
+            }
+          });
+
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Menú renombrado a "$newName"')),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error al renombrar menú: $e')),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _loadCustomMeals() async {
@@ -422,149 +684,170 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
   }
 
   Future<void> _copyMealsFromClient(
-  String sourceClientId,
-  String sourceClientName,
-  DateTime sourceDate,
-  String mealName,
-) async {
-  try {
-    final sourceDateStr = DateFormat('yyyy-MM-dd').format(sourceDate);
-    final currentDateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    String sourceClientId,
+    String sourceClientName,
+    DateTime sourceDate,
+    String mealName,
+  ) async {
+    try {
+      final sourceDateStr = DateFormat('yyyy-MM-dd').format(sourceDate);
+      final currentDateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
 
-    // Obtener datos de origen
-    final sourceDoc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(sourceClientId)
-        .collection('nutrition')
-        .doc(sourceDateStr)
-        .get();
+      // Obtener datos de origen
+      final sourceDoc =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(sourceClientId)
+              .collection('nutrition')
+              .doc(sourceDateStr)
+              .get();
 
-    if (!sourceDoc.exists) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No hay datos para copiar')),
-        );
-      }
-      return;
-    }
-
-    final sourceData = sourceDoc.data()!;
-    final sourceMeals = List<Map<String, dynamic>>.from(sourceData['meals'] ?? []);
-    final sourceMeal = sourceMeals.firstWhere(
-      (m) => m['name'] == mealName,
-      orElse: () => {},
-    );
-
-    if (sourceMeal.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se encontró la comida $mealName')),
-        );
-      }
-      return;
-    }
-
-    // Obtener referencia al documento destino
-    final currentDocRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.clientId)
-        .collection('nutrition')
-        .doc(currentDateStr);
-
-    await FirebaseFirestore.instance.runTransaction((transaction) async {
-      final currentDoc = await transaction.get(currentDocRef);
-      final currentData = currentDoc.exists 
-          ? Map<String, dynamic>.from(currentDoc.data()!) 
-          : await _getDefaultNutritionData();
-
-      // Actualizar comidas
-      final currentMeals = List<Map<String, dynamic>>.from(currentData['meals'] ?? []);
-      final targetMealIndex = currentMeals.indexWhere((m) => m['name'] == mealName);
-
-      // Calcular diferencias para actualizar los totales
-      double carbsToAdd = 0;
-      double proteinToAdd = 0;
-      double fatsToAdd = 0;
-      double caloriesToAdd = 0;
-
-      if (targetMealIndex != -1) {
-        // Si la comida existe, combinar items
-        final targetMeal = Map<String, dynamic>.from(currentMeals[targetMealIndex]);
-        final targetItems = List<Map<String, dynamic>>.from(targetMeal['items'] ?? []);
-        final sourceItems = List<Map<String, dynamic>>.from(sourceMeal['items'] ?? []);
-        
-        // Calcular los valores a agregar
-        for (final item in sourceItems) {
-          carbsToAdd += (item['carbs'] ?? 0).toDouble();
-          proteinToAdd += (item['protein'] ?? 0).toDouble();
-          fatsToAdd += (item['fats'] ?? 0).toDouble();
-          caloriesToAdd += (item['calories'] ?? 0).toDouble();
+      if (!sourceDoc.exists) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('No hay datos para copiar')));
         }
-        
-        targetItems.addAll(sourceItems);
-        
-        // Actualizar la comida
-        targetMeal['items'] = targetItems;
-        targetMeal['carbsConsumed'] = (targetMeal['carbsConsumed'] ?? 0) + carbsToAdd;
-        targetMeal['proteinConsumed'] = (targetMeal['proteinConsumed'] ?? 0) + proteinToAdd;
-        targetMeal['fatsConsumed'] = (targetMeal['fatsConsumed'] ?? 0) + fatsToAdd;
-        targetMeal['caloriesConsumed'] = (targetMeal['caloriesConsumed'] ?? 0) + caloriesToAdd;
-        
-        currentMeals[targetMealIndex] = targetMeal;
-      } else {
-        // Si la comida no existe, agregarla completa
-        currentMeals.add(sourceMeal);
-        
-        // Sumar todos los valores de la comida nueva
-        final items = List<Map<String, dynamic>>.from(sourceMeal['items'] ?? []);
-        for (final item in items) {
-          carbsToAdd += (item['carbs'] ?? 0).toDouble();
-          proteinToAdd += (item['protein'] ?? 0).toDouble();
-          fatsToAdd += (item['fats'] ?? 0).toDouble();
-          caloriesToAdd += (item['calories'] ?? 0).toDouble();
-        }
+        return;
       }
 
-      // Actualizar los totales generales
-      currentData['carbs'] = {
-        'consumed': (currentData['carbs']['consumed'] ?? 0) + carbsToAdd,
-        'total': currentData['carbs']['total'] ?? 0,
-      };
-      
-      currentData['protein'] = {
-        'consumed': (currentData['protein']['consumed'] ?? 0) + proteinToAdd,
-        'total': currentData['protein']['total'] ?? 0,
-      };
-      
-      currentData['fats'] = {
-        'consumed': (currentData['fats']['consumed'] ?? 0) + fatsToAdd,
-        'total': currentData['fats']['total'] ?? 0,
-      };
-      
-      currentData['calories'] = {
-        'consumed': (currentData['calories']['consumed'] ?? 0) + caloriesToAdd,
-        'total': currentData['calories']['total'] ?? 0,
-      };
-      
-      currentData['meals'] = currentMeals;
-
-      transaction.set(currentDocRef, currentData);
-    });
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Comida copiada exitosamente')),
+      final sourceData = sourceDoc.data()!;
+      final sourceMeals = List<Map<String, dynamic>>.from(
+        sourceData['meals'] ?? [],
       );
-      setState(() {}); // Refrescar la vista
-    }
-  } catch (e) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al copiar: $e')),
+      final sourceMeal = sourceMeals.firstWhere(
+        (m) => m['name'] == mealName,
+        orElse: () => {},
       );
+
+      if (sourceMeal.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('No se encontró la comida $mealName')),
+          );
+        }
+        return;
+      }
+
+      // Obtener referencia al documento destino
+      final currentDocRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.clientId)
+          .collection('nutrition')
+          .doc(currentDateStr);
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final currentDoc = await transaction.get(currentDocRef);
+        final currentData =
+            currentDoc.exists
+                ? Map<String, dynamic>.from(currentDoc.data()!)
+                : await _getDefaultNutritionData();
+
+        // Actualizar comidas
+        final currentMeals = List<Map<String, dynamic>>.from(
+          currentData['meals'] ?? [],
+        );
+        final targetMealIndex = currentMeals.indexWhere(
+          (m) => m['name'] == mealName,
+        );
+
+        // Calcular diferencias para actualizar los totales
+        double carbsToAdd = 0;
+        double proteinToAdd = 0;
+        double fatsToAdd = 0;
+        double caloriesToAdd = 0;
+
+        if (targetMealIndex != -1) {
+          // Si la comida existe, combinar items
+          final targetMeal = Map<String, dynamic>.from(
+            currentMeals[targetMealIndex],
+          );
+          final targetItems = List<Map<String, dynamic>>.from(
+            targetMeal['items'] ?? [],
+          );
+          final sourceItems = List<Map<String, dynamic>>.from(
+            sourceMeal['items'] ?? [],
+          );
+
+          // Calcular los valores a agregar
+          for (final item in sourceItems) {
+            carbsToAdd += (item['carbs'] ?? 0).toDouble();
+            proteinToAdd += (item['protein'] ?? 0).toDouble();
+            fatsToAdd += (item['fats'] ?? 0).toDouble();
+            caloriesToAdd += (item['calories'] ?? 0).toDouble();
+          }
+
+          targetItems.addAll(sourceItems);
+
+          // Actualizar la comida
+          targetMeal['items'] = targetItems;
+          targetMeal['carbsConsumed'] =
+              (targetMeal['carbsConsumed'] ?? 0) + carbsToAdd;
+          targetMeal['proteinConsumed'] =
+              (targetMeal['proteinConsumed'] ?? 0) + proteinToAdd;
+          targetMeal['fatsConsumed'] =
+              (targetMeal['fatsConsumed'] ?? 0) + fatsToAdd;
+          targetMeal['caloriesConsumed'] =
+              (targetMeal['caloriesConsumed'] ?? 0) + caloriesToAdd;
+
+          currentMeals[targetMealIndex] = targetMeal;
+        } else {
+          // Si la comida no existe, agregarla completa
+          currentMeals.add(sourceMeal);
+
+          // Sumar todos los valores de la comida nueva
+          final items = List<Map<String, dynamic>>.from(
+            sourceMeal['items'] ?? [],
+          );
+          for (final item in items) {
+            carbsToAdd += (item['carbs'] ?? 0).toDouble();
+            proteinToAdd += (item['protein'] ?? 0).toDouble();
+            fatsToAdd += (item['fats'] ?? 0).toDouble();
+            caloriesToAdd += (item['calories'] ?? 0).toDouble();
+          }
+        }
+
+        // Actualizar los totales generales
+        currentData['carbs'] = {
+          'consumed': (currentData['carbs']['consumed'] ?? 0) + carbsToAdd,
+          'total': currentData['carbs']['total'] ?? 0,
+        };
+
+        currentData['protein'] = {
+          'consumed': (currentData['protein']['consumed'] ?? 0) + proteinToAdd,
+          'total': currentData['protein']['total'] ?? 0,
+        };
+
+        currentData['fats'] = {
+          'consumed': (currentData['fats']['consumed'] ?? 0) + fatsToAdd,
+          'total': currentData['fats']['total'] ?? 0,
+        };
+
+        currentData['calories'] = {
+          'consumed':
+              (currentData['calories']['consumed'] ?? 0) + caloriesToAdd,
+          'total': currentData['calories']['total'] ?? 0,
+        };
+
+        currentData['meals'] = currentMeals;
+
+        transaction.set(currentDocRef, currentData);
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Comida copiada exitosamente')));
+        setState(() {}); // Refrescar la vista
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al copiar: $e')));
+      }
     }
   }
-}
 
   Future<void> _showMyFoodsDialog(String mealName) async {
     final savedFoods = await _getSavedFoods();
@@ -845,17 +1128,18 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
               IconButton(
                 icon: Icon(Icons.chevron_left),
                 onPressed: () {
-                  final duration =
+                  /*final duration =
                       _selectedPeriod == 'Día'
                           ? Duration(days: 1)
                           : _selectedPeriod == 'Semana'
                           ? Duration(days: 7)
                           : _selectedPeriod == 'Mes'
                           ? Duration(days: 30)
-                          : Duration(days: 365);
+                          : Duration(days: 365);*/
                   setState(() {
-                    _selectedDate = _selectedDate.subtract(duration);
+                    _selectedDate = _selectedDate.subtract(Duration(days: 1));
                     _nutritionData = _loadNutritionDataForDate(_selectedDate);
+                    _selectedMenu = null;
                   });
                 },
               ),
@@ -869,24 +1153,135 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
               IconButton(
                 icon: Icon(Icons.chevron_right),
                 onPressed: () {
-                  final duration =
+                  /*final duration =
                       _selectedPeriod == 'Día'
                           ? Duration(days: 1)
                           : _selectedPeriod == 'Semana'
                           ? Duration(days: 7)
                           : _selectedPeriod == 'Mes'
                           ? Duration(days: 30)
-                          : Duration(days: 365);
+                          : Duration(days: 365);*/
                   setState(() {
-                    _selectedDate = _selectedDate.add(duration);
+                    _selectedDate = _selectedDate.add(Duration(days: 1));
                     _nutritionData = _loadNutritionDataForDate(_selectedDate);
+                    _selectedMenu = null;
                   });
+                },
+              ),
+              PopupMenuButton<String>(
+                icon: Icon(Icons.restaurant_menu),
+                onSelected: (value) {
+                  if (value == 'save') {
+                    _showSaveMenuDialog();
+                  } else {
+                    _loadMenuToDate(value, _selectedDate);
+                  }
+                },
+                itemBuilder: (context) {
+                  return [
+                    PopupMenuItem(
+                      value: 'save',
+                      child: Text('Guardar menú actual'),
+                    ),
+                    PopupMenuDivider(),
+                    if (_savedMenus.isNotEmpty)
+                      ..._savedMenus
+                          .map(
+                            (menu) => PopupMenuItem(
+                              value: menu,
+                              child: Row(
+                                children: [
+                                  Expanded(child: Text(menu)),
+                                  PopupMenuButton<String>(
+                                    icon: Icon(Icons.more_vert, size: 16),
+                                    itemBuilder:
+                                        (context) => [
+                                          PopupMenuItem(
+                                            value: 'rename',
+                                            child: Text('Renombrar'),
+                                          ),
+                                          PopupMenuItem(
+                                            value: 'delete',
+                                            child: Text(
+                                              'Eliminar',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                    onSelected: (action) {
+                                      Navigator.pop(
+                                        context,
+                                      ); // Cerrar el menú principal primero
+                                      if (action == 'rename') {
+                                        _renameMenu(menu);
+                                      } else if (action == 'delete') {
+                                        _deleteMenu(menu);
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    if (_savedMenus.isEmpty)
+                      PopupMenuItem(
+                        enabled: false,
+                        child: Text('No hay menús guardados'),
+                      ),
+                  ];
                 },
               ),
             ],
           ),
+          if (_selectedMenu != null)
+            Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: Text(
+                'Menú: $_selectedMenu',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+            ),
         ],
       ),
+    );
+  }
+
+  // 6. Diálogo para guardar el menú actual
+  Future<void> _showSaveMenuDialog() async {
+    final menuNameController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text('Guardar menú'),
+            content: TextField(
+              controller: menuNameController,
+              decoration: InputDecoration(
+                labelText: 'Nombre del menú',
+                hintText: 'Ej: Menú Vegetariano',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _saveCurrentMenuAs(menuNameController.text.trim());
+                },
+                child: Text('Guardar'),
+              ),
+            ],
+          ),
     );
   }
 
@@ -1171,7 +1566,12 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
                       ),
                       SizedBox(height: 2),
                       Text(
-                        safeItem['quantity'] ?? 'Cantidad',
+                        [
+                          if (safeItem['brand'] != null &&
+                              safeItem['brand'].isNotEmpty)
+                            safeItem['brand'],
+                          safeItem['quantity'] ?? 'Cantidad',
+                        ].join(', '),
                         style: TextStyle(color: Colors.grey, fontSize: 12),
                       ),
                     ],
@@ -1282,75 +1682,96 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
   }
 
   Future<void> _deleteFoodItem(
-  String mealName,
-  int index,
-  Map<String, dynamic> foodItem,
-) async {
-  try {
-    final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
-    final docRef = FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.clientId)
-        .collection('nutrition')
-        .doc(dateStr);
+    String mealName,
+    int index,
+    Map<String, dynamic> foodItem,
+  ) async {
+    try {
+      final dateStr = DateFormat('yyyy-MM-dd').format(_selectedDate);
+      final docRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.clientId)
+          .collection('nutrition')
+          .doc(dateStr);
 
-    await FirebaseFirestore.instance.runTransaction((transaction) async {
-      final doc = await transaction.get(docRef);
-      if (!doc.exists) return;
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final doc = await transaction.get(docRef);
+        if (!doc.exists) return;
 
-      final data = doc.data()!;
-      final meals = List<Map<String, dynamic>>.from(data['meals'] ?? []);
-      final mealIndex = meals.indexWhere((m) => m['name'] == mealName);
+        final data = doc.data()!;
+        final meals = List<Map<String, dynamic>>.from(data['meals'] ?? []);
+        final mealIndex = meals.indexWhere((m) => m['name'] == mealName);
 
-      if (mealIndex != -1) {
-        final meal = Map<String, dynamic>.from(meals[mealIndex]);
-        final items = List<Map<String, dynamic>>.from(meal['items'] ?? []);
+        if (mealIndex != -1) {
+          final meal = Map<String, dynamic>.from(meals[mealIndex]);
+          final items = List<Map<String, dynamic>>.from(meal['items'] ?? []);
 
-        if (index < items.length) {
-          final food = items[index];
-          
-          // Obtener valores nutricionales (asegurando que no sean nulos)
-          final carbs = (food['carbs'] ?? 0).toDouble();
-          final protein = (food['protein'] ?? 0).toDouble();
-          final fats = (food['fats'] ?? 0).toDouble();
-          final calories = (food['calories'] ?? 0).toDouble();
+          if (index < items.length) {
+            final food = items[index];
 
-          // Actualizar la comida (con prevención de valores negativos)
-          meal['carbsConsumed'] = max(0, (meal['carbsConsumed'] ?? 0) - carbs);
-          meal['proteinConsumed'] = max(0, (meal['proteinConsumed'] ?? 0) - protein);
-          meal['fatsConsumed'] = max(0, (meal['fatsConsumed'] ?? 0) - fats);
-          meal['caloriesConsumed'] = max(0, (meal['caloriesConsumed'] ?? 0) - calories);
+            // Obtener valores nutricionales (asegurando que no sean nulos)
+            final carbs = (food['carbs'] ?? 0).toDouble();
+            final protein = (food['protein'] ?? 0).toDouble();
+            final fats = (food['fats'] ?? 0).toDouble();
+            final calories = (food['calories'] ?? 0).toDouble();
 
-          // Eliminar el alimento
-          items.removeAt(index);
-          meal['items'] = items;
-          meals[mealIndex] = meal;
+            // Actualizar la comida (con prevención de valores negativos)
+            meal['carbsConsumed'] = max(
+              0,
+              (meal['carbsConsumed'] ?? 0) - carbs,
+            );
+            meal['proteinConsumed'] = max(
+              0,
+              (meal['proteinConsumed'] ?? 0) - protein,
+            );
+            meal['fatsConsumed'] = max(0, (meal['fatsConsumed'] ?? 0) - fats);
+            meal['caloriesConsumed'] = max(
+              0,
+              (meal['caloriesConsumed'] ?? 0) - calories,
+            );
 
-          // Actualizar totales generales (con prevención de valores negativos)
-          data['carbs']['consumed'] = max(0, (data['carbs']['consumed'] ?? 0) - carbs);
-          data['protein']['consumed'] = max(0, (data['protein']['consumed'] ?? 0) - protein);
-          data['fats']['consumed'] = max(0, (data['fats']['consumed'] ?? 0) - fats);
-          data['calories']['consumed'] = max(0, (data['calories']['consumed'] ?? 0) - calories);
-          data['meals'] = meals;
+            // Eliminar el alimento
+            items.removeAt(index);
+            meal['items'] = items;
+            meals[mealIndex] = meal;
 
-          transaction.update(docRef, data);
+            // Actualizar totales generales (con prevención de valores negativos)
+            data['carbs']['consumed'] = max(
+              0,
+              (data['carbs']['consumed'] ?? 0) - carbs,
+            );
+            data['protein']['consumed'] = max(
+              0,
+              (data['protein']['consumed'] ?? 0) - protein,
+            );
+            data['fats']['consumed'] = max(
+              0,
+              (data['fats']['consumed'] ?? 0) - fats,
+            );
+            data['calories']['consumed'] = max(
+              0,
+              (data['calories']['consumed'] ?? 0) - calories,
+            );
+            data['meals'] = meals;
+
+            transaction.update(docRef, data);
+          }
         }
-      }
-    });
+      });
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Alimento eliminado exitosamente')),
-      );
-    }
-  } catch (e) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al eliminar alimento: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Alimento eliminado exitosamente')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al eliminar alimento: $e')),
+        );
+      }
     }
   }
-}
 
   Future<void> _editFoodItem(
     String mealName,

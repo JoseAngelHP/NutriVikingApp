@@ -4,11 +4,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ClientHomeScreen extends StatelessWidget {
+class ClientHomeScreen extends StatefulWidget {
   final String userId;
 
   const ClientHomeScreen({Key? key, required this.userId}) : super(key: key);
 
+  @override
+  State<ClientHomeScreen> createState() => _ClientHomeScreenState();
+}
+
+class _ClientHomeScreenState extends State<ClientHomeScreen> {
+  List<String> _savedMenus = [];
+  String? _selectedMenu;
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -85,7 +92,7 @@ class ClientHomeScreen extends StatelessWidget {
       stream:
           FirebaseFirestore.instance
               .collection('users')
-              .doc(userId)
+              .doc(widget.userId)
               .collection('workouts')
               .doc(today)
               .snapshots(),
@@ -195,7 +202,7 @@ class ClientHomeScreen extends StatelessWidget {
       stream:
           FirebaseFirestore.instance
               .collection('users')
-              .doc(userId)
+              .doc(widget.userId)
               .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
@@ -256,7 +263,7 @@ class ClientHomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNutritionPlan() {
+  /*Widget _buildNutritionPlan() {
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
     return StreamBuilder<DocumentSnapshot>(
@@ -296,6 +303,100 @@ class ClientHomeScreen extends StatelessWidget {
           },
         );
       },
+    );
+  }*/
+
+  Widget _buildNutritionPlan() {
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    return Column(
+      children: [
+        // Selector de menús
+        PopupMenuButton<String>(
+          icon: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Color(0xFFb51837),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.restaurant_menu, color: Colors.white, size: 20),
+                SizedBox(width: 8),
+                Text('Menús', style: TextStyle(color: Colors.white)),
+              ],
+            ),
+          ),
+          onSelected: (menuName) {
+            setState(() {
+              _selectedMenu = menuName;
+            });
+          },
+          itemBuilder: (context) {
+            return [
+              PopupMenuItem(value: null, child: Text('Plan del día')),
+              PopupMenuDivider(),
+              ..._savedMenus
+                  .map((menu) => PopupMenuItem(value: menu, child: Text(menu)))
+                  .toList(),
+            ];
+          },
+        ),
+        SizedBox(height: 10),
+        // Contenido del plan de nutrición
+        Expanded(
+          child: StreamBuilder<DocumentSnapshot>(
+            stream:
+                _selectedMenu == null
+                    ? FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(widget.userId)
+                        .collection('nutrition')
+                        .doc(today)
+                        .snapshots()
+                    : FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(widget.userId)
+                        .collection('saved_menus')
+                        .doc(_selectedMenu)
+                        .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                );
+              }
+
+              if (!snapshot.hasData || !snapshot.data!.exists) {
+                return Center(
+                  child: Text(
+                    _selectedMenu == null
+                        ? 'Tu coach aún no ha asignado tu plan de alimentación para hoy.\n\nRevisa más tarde o contacta a tu coach.'
+                        : 'El menú seleccionado no contiene información.',
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              }
+
+              final data = snapshot.data!.data() as Map<String, dynamic>;
+              final meals = data['meals'] as List<dynamic>;
+
+              return ListView.separated(
+                itemCount: meals.length,
+                separatorBuilder: (context, index) => SizedBox(height: 16),
+                itemBuilder: (context, index) {
+                  final meal = meals[index] as Map<String, dynamic>;
+                  final items = meal['items'] as List<dynamic>;
+
+                  return _buildMealSection(meal['name'], items);
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -366,7 +467,11 @@ class ClientHomeScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                '${food['quantity'] ?? '1'} porción',
+                [
+                  if (food['brand'] != null && food['brand'].isNotEmpty)
+                    food['brand'],
+                  '${food['quantity'] ?? '1'} porción',
+                ].join(', '),
                 style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ],
@@ -376,6 +481,26 @@ class ClientHomeScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedMenus();
+  }
+
+  Future<void> _loadSavedMenus() async {
+    final doc =
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.userId)
+            .get();
+
+    if (doc.exists) {
+      setState(() {
+        _savedMenus = List<String>.from(doc.data()?['savedMenus'] ?? []);
+      });
+    }
   }
 
   void _logout(BuildContext context) async {

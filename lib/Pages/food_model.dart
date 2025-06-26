@@ -9,6 +9,7 @@ class FoodItem {
   final double fats;
   final double? sodium; // Nuevo campo opcional
   final double? potassium; // Nuevo campo opcional
+  final String? brand; // Nuevo campo para la marca
 
   FoodItem({
     required this.id,
@@ -20,6 +21,7 @@ class FoodItem {
     required this.fats,
     this.sodium, // Opcional
     this.potassium, // Opcional
+    this.brand, // Opcional
   });
 
   Map<String, dynamic> toMap() {
@@ -33,6 +35,7 @@ class FoodItem {
       'fats': fats,
       'sodium': sodium, // Incluido en el mapa
       'potassium': potassium, // Incluido en el mapa
+      'brand': brand, // Incluido en el mapa
     };
   }
 
@@ -47,6 +50,7 @@ class FoodItem {
       fats: (map['fats'] ?? 0).toDouble(),
       sodium: map['sodium']?.toDouble(), // Conversión nullable
       potassium: map['potassium']?.toDouble(), // Conversión nullable
+      brand: map['brand'], // No necesita conversión
     );
   }
 }
