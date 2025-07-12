@@ -27,8 +27,8 @@ class _OnboardingState extends State<Onboarding> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              "assets/logoviking.png",
-              color: Colors.white,
+              "assets/logonuevodos.png",
+              //color: Colors.black,
               height: 200,
               width: 200,
               fit: BoxFit.cover,

@@ -10,6 +10,7 @@ class FoodItem {
   final double? sodium; // Nuevo campo opcional
   final double? potassium; // Nuevo campo opcional
   final String? brand; // Nuevo campo para la marca
+  final List<String>? suggestions; // Nuevo campo para sugerencias
 
   FoodItem({
     required this.id,
@@ -22,6 +23,7 @@ class FoodItem {
     this.sodium, // Opcional
     this.potassium, // Opcional
     this.brand, // Opcional
+    this.suggestions, // Opcional
   });
 
   Map<String, dynamic> toMap() {
@@ -36,6 +38,7 @@ class FoodItem {
       'sodium': sodium, // Incluido en el mapa
       'potassium': potassium, // Incluido en el mapa
       'brand': brand, // Incluido en el mapa
+      'suggestions': suggestions, // Incluido en el mapa
     };
   }
 
@@ -51,6 +54,9 @@ class FoodItem {
       sodium: map['sodium']?.toDouble(), // Conversión nullable
       potassium: map['potassium']?.toDouble(), // Conversión nullable
       brand: map['brand'], // No necesita conversión
+      suggestions: map['suggestions'] != null 
+          ? List<String>.from(map['suggestions']) 
+          : null, // Conversión a List<String>
     );
   }
 }
@@ -81,6 +87,17 @@ class Meal {
   double? get totalPotassium {
     final values = items.where((item) => item.potassium != null).map((item) => item.potassium!);
     return values.isEmpty ? null : values.reduce((sum, potassium) => sum + potassium);
+  }
+
+  // Nuevo getter para todas las sugerencias de la comida
+  Map<String, List<String>> get allSuggestions {
+    final Map<String, List<String>> result = {};
+    for (final item in items) {
+      if (item.suggestions != null && item.suggestions!.isNotEmpty) {
+        result[item.name] = item.suggestions!;
+      }
+    }
+    return result;
   }
 
   Map<String, dynamic> toMap() {

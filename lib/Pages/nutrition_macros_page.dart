@@ -360,8 +360,8 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
 
       if (doc.exists) {
         final data = doc.data()!;
-        final existingMeals = List<String>.from(
-          (data['meals'] as List).map((m) => m['name']),
+        final existingMeals = List<String>.from(data['meals'] ?? []
+          //(data['meals'] as List).map((m) => m['name']),
         );
 
         if (!listEquals(existingMeals, _mealTypes)) {
@@ -1545,6 +1545,9 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
       final index = entry.key;
       final item = entry.value;
       final safeItem = item is Map<String, dynamic> ? item : {};
+      final List<String>? suggestions = safeItem['suggestions'] != null 
+      ? List<String>.from(safeItem['suggestions'])
+      : null;
 
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1574,6 +1577,40 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
                         ].join(', '),
                         style: TextStyle(color: Colors.grey, fontSize: 12),
                       ),
+                      // Sección de sugerencias añadida aquí
+                    if (suggestions != null && suggestions.isNotEmpty) ...[
+                      SizedBox(height: 6),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Sugerencias:',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 4,
+                            children: suggestions.map((suggestion) => Chip(
+                              label: Text(
+                                suggestion,
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              backgroundColor: Color(0xFFFE7900).withOpacity(0.1),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                side: BorderSide(
+                                  color: Color(0xFFFE7900).withOpacity(0.3)),
+                              ),
+                            )).toList(),
+                          ),
+                        ],
+                      ),
+                    ],
                     ],
                   ),
                 ),

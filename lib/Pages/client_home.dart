@@ -16,6 +16,7 @@ class ClientHomeScreen extends StatefulWidget {
 class _ClientHomeScreenState extends State<ClientHomeScreen> {
   List<String> _savedMenus = [];
   String? _selectedMenu;
+  DateTime _selectedWorkoutDate = DateTime.now(); // Añade esta variable de estado
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -25,29 +26,29 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         appBar: AppBar(
           title: Text(
             'Mi Plan de Alimentación',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.black),
           ),
-          backgroundColor: Color(0xFFb51837),
+          backgroundColor: Color(0xFFFE7900),
           actions: [
             IconButton(
-              icon: Icon(Icons.logout, color: Colors.white),
+              icon: Icon(Icons.logout, color: Colors.black),
               onPressed: () => _logout(context),
             ),
           ],
           bottom: TabBar(
-            indicatorColor: Colors.white,
+            indicatorColor: Colors.black,
             labelColor:
-                Colors.white, // Color del texto de la pestaña seleccionada
+                Colors.black, // Color del texto de la pestaña seleccionada
             unselectedLabelColor:
-                Colors.white70, // Color del texto de pestañas no seleccionadas
+                Colors.black87, // Color del texto de pestañas no seleccionadas
             labelStyle: TextStyle(fontWeight: FontWeight.bold),
             tabs: [
               Tab(
-                icon: Icon(Icons.fastfood, color: Colors.white),
+                icon: Icon(Icons.fastfood, color: Colors.black),
                 text: 'Alimentación',
               ),
               Tab(
-                icon: Icon(Icons.fitness_center, color: Colors.white),
+                icon: Icon(Icons.fitness_center, color: Colors.black),
                 text: 'Ejercicios',
               ),
             ],
@@ -56,7 +57,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Color(0xFF301939), Color(0xFF661c3a)],
+              colors: [Color(0xFFFFFFFF), Color(0xFFE5E4E4)],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
@@ -86,43 +87,90 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   }
 
   Widget _buildWorkoutPlan() {
-    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-
-    return StreamBuilder<DocumentSnapshot>(
-      stream:
-          FirebaseFirestore.instance
+    return Column(
+      children: [
+        // Selector de fecha (AÑADIDO)
+        Padding(
+          padding: const EdgeInsets.only(bottom: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: Icon(Icons.chevron_left),
+                onPressed: () {
+                  setState(() {
+                    _selectedWorkoutDate = _selectedWorkoutDate.subtract(Duration(days: 1));
+                  });
+                },
+              ),
+              TextButton(
+                onPressed: () async {
+                  final DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: _selectedWorkoutDate,
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) {
+                    setState(() => _selectedWorkoutDate = picked);
+                  }
+                },
+                child: Text(
+                  DateFormat('EEEE, d MMMM').format(_selectedWorkoutDate),
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.chevron_right),
+                onPressed: () {
+                  setState(() {
+                    _selectedWorkoutDate = _selectedWorkoutDate.add(Duration(days: 1));
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+        
+        // StreamBuilder modificado para usar _selectedWorkoutDate
+        StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
               .collection('users')
               .doc(widget.userId)
               .collection('workouts')
-              .doc(today)
+              .doc(DateFormat('yyyy-MM-dd').format(_selectedWorkoutDate))
               .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator(color: Colors.white));
-        }
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator(color: Colors.white));
+            }
 
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Center(
-            child: Text(
-              'Tu coach aún no ha asignado ejercicios para hoy.\n\nRevisa más tarde o contacta a tu coach.',
-              style: TextStyle(color: Colors.white70, fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-          );
-        }
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return Center(
+                child: Text(
+                  'No hay ejercicios asignados para este día.\n\nRevisa otra fecha o contacta a tu coach.',
+                  style: TextStyle(color: Colors.black, fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
 
-        final data = snapshot.data!.data() as Map<String, dynamic>;
-        final exercises = (data['exercises'] as List<dynamic>?) ?? [];
+            final data = snapshot.data!.data() as Map<String, dynamic>;
+            final exercises = (data['exercises'] as List<dynamic>?) ?? [];
 
-        return ListView.separated(
-          itemCount: exercises.length,
-          separatorBuilder: (context, index) => SizedBox(height: 16),
-          itemBuilder: (context, index) {
-            final exercise = exercises[index] as Map<String, dynamic>;
-            return _buildExerciseSection(exercise);
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: exercises.length,
+              separatorBuilder: (context, index) => SizedBox(height: 16),
+              itemBuilder: (context, index) {
+                final exercise = exercises[index] as Map<String, dynamic>;
+                return _buildExerciseSection(exercise);
+              },
+            );
           },
-        );
-      },
+        ),
+      ],
     );
   }
 
@@ -131,7 +179,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Card(
-          color: Color(0xFF4a1e5a),
+          color: Color(0xFFedbb99),
           child: Padding(
             padding: EdgeInsets.all(16),
             child: Column(
@@ -175,7 +223,10 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                             },
                             child: Row(
                               children: [
-                                Icon(Icons.picture_as_pdf, color: Colors.red),
+                                Icon(
+                                  Icons.picture_as_pdf,
+                                  color: Colors.white70,
+                                ),
                                 SizedBox(width: 8),
                                 Text(
                                   'Ver PDF',
@@ -212,7 +263,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         final user = snapshot.data!.data() as Map<String, dynamic>;
 
         return Card(
-          color: Color(0xFF4a1e5a),
+          color: Color(0xFFedbb99),
           child: Padding(
             padding: EdgeInsets.all(16),
             child: Column(
@@ -316,15 +367,15 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           icon: Container(
             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: Color(0xFFb51837),
+              color: Color(0xFFf9f9f9),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.restaurant_menu, color: Colors.white, size: 20),
+                Icon(Icons.restaurant_menu, color: Colors.black, size: 20),
                 SizedBox(width: 8),
-                Text('Menús', style: TextStyle(color: Colors.white)),
+                Text('Menús', style: TextStyle(color: Colors.black)),
               ],
             ),
           ),
@@ -374,7 +425,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                     _selectedMenu == null
                         ? 'Tu coach aún no ha asignado tu plan de alimentación para hoy.\n\nRevisa más tarde o contacta a tu coach.'
                         : 'El menú seleccionado no contiene información.',
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                    style: TextStyle(color: Colors.black, fontSize: 16),
                     textAlign: TextAlign.center,
                   ),
                 );
@@ -409,14 +460,14 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           child: Text(
             mealName,
             style: TextStyle(
-              color: Colors.white,
+              color: Colors.black,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
         Card(
-          color: Color(0xFF4a1e5a),
+          color: Color(0xFFedbb99),
           child: Padding(
             padding: EdgeInsets.all(12),
             child:
@@ -448,11 +499,17 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   }
 
   Widget _buildFoodItem(Map<String, dynamic> food, {bool isLast = false}) {
+    final List<String>? suggestions =
+        food['suggestions'] != null
+            ? List<String>.from(food['suggestions'])
+            : null;
+
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Información principal del alimento
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -476,6 +533,57 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
               ),
             ],
           ),
+
+          // Sección de sugerencias
+          if (suggestions != null && suggestions.isNotEmpty) ...[
+            SizedBox(height: 6),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Sugerencias:',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children:
+                      suggestions
+                          .map(
+                            (suggestion) => Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Color(0xFFFE7900).withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Color(0xFFFE7900).withOpacity(0.5),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                suggestion,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                ),
+              ],
+            ),
+          ],
+
+          // Separador
           SizedBox(height: 6),
           if (!isLast) Divider(color: Colors.white54, height: 16),
         ],

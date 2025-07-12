@@ -4,11 +4,13 @@ import 'package:nutri_viking_app/Pages/food_model.dart';
 class AddFoodDialog extends StatefulWidget {
   final Function(FoodItem) onAdd;
   final FoodItem? initialFood;
+  final Future<List<String>> Function(String foodName)? fetchSuggestions; // Nuevo: Función para obtener sugerencias
 
   const AddFoodDialog({
     Key? key, 
     required this.onAdd,
     this.initialFood,
+    this.fetchSuggestions, // Opcional: Si no se provee, no se mostrarán sugerencias
   }) : super(key: key);
 
   @override
@@ -26,6 +28,7 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
   late TextEditingController _sodiumController; // Nuevo controlador para sodio
   late TextEditingController _potassiumController; // Nuevo controlador para potasio
   late TextEditingController _brandController; // Nuevo controlador para la marca
+  late TextEditingController _suggestionsController; // Nuevo controlador para sugerencias
 
   // Valores base por 100g
   double _baseCalories = 0;
@@ -41,6 +44,9 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
     _nameController = TextEditingController(text: widget.initialFood?.name ?? '');
     _quantityController = TextEditingController(text: widget.initialFood?.quantity ?? '100g');
     _brandController = TextEditingController(text: widget.initialFood?.brand ?? ''); // Inicializar controlador de marca
+    _suggestionsController = TextEditingController(
+      text: widget.initialFood?.suggestions?.join(', ') ?? '', // Unir sugerencias con comas
+    );
     
     // Inicializar valores base si estamos editando
     if (widget.initialFood != null) {
@@ -255,6 +261,15 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
                 decoration: InputDecoration(labelText: 'Potasio (mg) (opcional)'),
                 keyboardType: TextInputType.number,
               ),
+              // Campo para sugerencias (nuevo)
+              TextFormField(
+                controller: _suggestionsController,
+                decoration: InputDecoration(
+                  labelText: 'Sugerencias de acompañamiento (opcional)',
+                  hintText: 'Ej: Guacamole, Pico de gallo, Crema',
+                  helperText: 'Separa cada sugerencia con comas',
+                ),
+              ),
             ],
           ),
         ),
@@ -274,6 +289,11 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
+      // Procesar sugerencias: convertir texto separado por comas en List<String>
+      final suggestionsText = _suggestionsController.text.trim();
+      final List<String>? suggestions = suggestionsText.isNotEmpty
+          ? suggestionsText.split(',').map((s) => s.trim()).toList()
+          : null;
       final newFood = FoodItem(
         id: widget.initialFood?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text,
@@ -285,6 +305,7 @@ class _AddFoodDialogState extends State<AddFoodDialog> {
         sodium: _sodiumController.text.isNotEmpty ? double.tryParse(_sodiumController.text) : null,
         potassium: _potassiumController.text.isNotEmpty ? double.tryParse(_potassiumController.text) : null,
         brand: _brandController.text.isNotEmpty ? _brandController.text : null, // Añadir la marca
+        suggestions: suggestions, // Añadir las sugerencias procesadas
       );
       widget.onAdd(newFood);
     }

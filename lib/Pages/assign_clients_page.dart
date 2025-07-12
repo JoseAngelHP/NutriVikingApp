@@ -14,14 +14,14 @@ class AssignClientsPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'Asignar Clientes',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black),
         ),
-        backgroundColor: const Color(0xFFb51837),
+        backgroundColor: const Color(0xFFFE7900),
       ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF301939), Color(0xFF661c3a)],
+            colors: [Color(0xFFFFFFFF), Color(0xFFE5E4E4)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -64,12 +64,12 @@ class AssignClientsPage extends StatelessWidget {
               itemBuilder: (context, index) {
                 final client = snapshot.data!.docs[index];
                 return Card(
-                  color: const Color(0xFF4a1e5a),
+                  color: const Color(0xFFedbb99),
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(16),
                     leading: CircleAvatar(
-                      backgroundColor: const Color(0xFFb51837),
+                      backgroundColor: const Color(0xFF000000),
                       child: Text(
                         '${index + 1}',
                         style: const TextStyle(color: Colors.white),

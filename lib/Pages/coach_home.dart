@@ -17,18 +17,18 @@ class CoachHomeScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Color(0xFF301939),
       appBar: AppBar(
-        title: Text('Panel del Coach', style: TextStyle(color: Colors.white)),
-        backgroundColor: Color(0xFFb51837),
+        title: Text('Panel del Coach', style: TextStyle(color: Colors.black)),
+        backgroundColor: Color(0xFFFE7900),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout, color: Colors.white),
+            icon: Icon(Icons.logout, color: Colors.black),
             onPressed: () => _logout(context),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         // Botón nuevo para asignar clientes
-        backgroundColor: Color(0xFFb51837),
+        backgroundColor: Color(0xFF000000),
         child: Icon(Icons.person_add, color: Colors.white),
         onPressed: () {
           Navigator.push(
@@ -42,7 +42,7 @@ class CoachHomeScreen extends StatelessWidget {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF301939), Color(0xFF661c3a)],
+            colors: [Color(0xFFFFFFFF), Color(0xFFE5E4E4)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -55,7 +55,7 @@ class CoachHomeScreen extends StatelessWidget {
               Text(
                 'Mis Clientes',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -97,12 +97,13 @@ class CoachHomeScreen extends StatelessWidget {
           itemBuilder: (context, index) {
             final client = clients[index];
             return Card(
-              color: Color(0xFF4a1e5a),
+              color: Color(0xFFedbb99),
+              //color: Colors.transparent,
               margin: EdgeInsets.only(bottom: 12),
               child: ListTile(
                 contentPadding: EdgeInsets.all(16),
                 leading: CircleAvatar(
-                  backgroundColor: Color(0xFFb51837),
+                  backgroundColor: Color(0xFF1C1C1C),
                   child: Text(
                     '${index + 1}',
                     style: TextStyle(color: Colors.white),
@@ -120,7 +121,7 @@ class CoachHomeScreen extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
+                      icon: Icon(Icons.delete, color: Colors.white),
                       onPressed:
                           () => _confirmDeleteClient(
                             context,
