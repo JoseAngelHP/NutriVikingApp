@@ -360,9 +360,7 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
 
       if (doc.exists) {
         final data = doc.data()!;
-        final existingMeals = List<String>.from(data['meals'] ?? []
-          //(data['meals'] as List).map((m) => m['name']),
-        );
+        final existingMeals = (data['meals'] as List?)?.map((m) => m['name'].toString()).toList() ?? [];
 
         if (!listEquals(existingMeals, _mealTypes)) {
           final newData = await _getDefaultNutritionData(); // Ahora es async
