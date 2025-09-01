@@ -309,26 +309,25 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
               .get();
 
       if (doc.exists) {
-        final data = doc.data();
-        if (data != null && data.containsKey('customMeals')) {
+        final data = doc.data()!;
+
+        // Cargar nombres de visualización
+        if (data.containsKey('customMeals')) {
           setState(() {
             _mealTypes = List<String>.from(data['customMeals']);
           });
-        } else {
-          // Si el campo no existe, usa valores por defecto
-          setState(() {
-            _mealTypes = ['Desayuno', 'Almuerzo', 'Cena'];
-          });
-          // Opcional: crea el campo en Firestore
-          await _initializeCustomMeals();
+        }
+
+        // Si no existe mealIds, crearlos basados en los nombres actuales
+        if (!data.containsKey('mealIds')) {
+          await _initializeMealIds();
         }
       } else {
-        // Si el documento no existe
         setState(() {
           _mealTypes = ['Desayuno', 'Almuerzo', 'Cena'];
         });
-        // Opcional: crea el documento con valores por defecto
         await _initializeCustomMeals();
+        await _initializeMealIds();
       }
     } catch (e) {
       print('Error cargando comidas personalizadas: $e');
@@ -336,6 +335,21 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
         _mealTypes = ['Desayuno', 'Almuerzo', 'Cena'];
       });
     }
+  }
+
+  // Nueva función para inicializar IDs fijos
+  Future<void> _initializeMealIds() async {
+    final mealIds = _mealTypes.map((meal) => _generateMealId(meal)).toList();
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.clientId)
+        .set({'mealIds': mealIds}, SetOptions(merge: true));
+  }
+
+  String _generateMealId(String mealName) {
+    // Convierte a minúsculas y reemplaza espacios
+    return mealName.toLowerCase().replaceAll(' ', '_');
   }
 
   Future<void> _initializeCustomMeals() async {
@@ -360,22 +374,15 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
 
       if (doc.exists) {
         final data = doc.data()!;
-        final existingMeals = (data['meals'] as List?)?.map((m) => m['name'].toString()).toList() ?? [];
-
-        if (!listEquals(existingMeals, _mealTypes)) {
-          final newData = await _getDefaultNutritionData(); // Ahora es async
-          await docRef.set(newData, SetOptions(merge: true));
-          return newData;
-        }
-        return data;
+        return data; // ¡No verificar coincidencias! Los IDs se mantienen
       } else {
-        final defaultData = await _getDefaultNutritionData(); // Ahora es async
+        final defaultData = await _getDefaultNutritionData();
         await docRef.set(defaultData);
         return defaultData;
       }
     } catch (e) {
       print('Error loading nutrition data: $e');
-      return await _getDefaultNutritionData(); // Ahora es async
+      return await _getDefaultNutritionData();
     }
   }
 
@@ -387,6 +394,14 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
               .collection('users')
               .doc(widget.clientId)
               .get();
+
+      List<String> mealIds = [];
+      if (userDoc.exists && userDoc.data()!.containsKey('mealIds')) {
+        mealIds = List<String>.from(userDoc.data()!['mealIds']);
+      } else {
+        // Si no hay IDs, generarlos desde los nombres actuales
+        mealIds = _mealTypes.map((meal) => _generateMealId(meal)).toList();
+      }
 
       if (!userDoc.exists) throw Exception('El cliente no existe');
 
@@ -1543,9 +1558,10 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
       final index = entry.key;
       final item = entry.value;
       final safeItem = item is Map<String, dynamic> ? item : {};
-      final List<String>? suggestions = safeItem['suggestions'] != null 
-      ? List<String>.from(safeItem['suggestions'])
-      : null;
+      final List<String>? suggestions =
+          safeItem['suggestions'] != null
+              ? List<String>.from(safeItem['suggestions'])
+              : null;
 
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1576,39 +1592,51 @@ class _NutritionMacrosPageState extends State<NutritionMacrosPage> {
                         style: TextStyle(color: Colors.grey, fontSize: 12),
                       ),
                       // Sección de sugerencias añadida aquí
-                    if (suggestions != null && suggestions.isNotEmpty) ...[
-                      SizedBox(height: 6),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Sugerencias:',
-                            style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 12,
-                              fontStyle: FontStyle.italic,
+                      if (suggestions != null && suggestions.isNotEmpty) ...[
+                        SizedBox(height: 6),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Sugerencias:',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                                fontStyle: FontStyle.italic,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 4),
-                          Wrap(
-                            spacing: 6,
-                            runSpacing: 4,
-                            children: suggestions.map((suggestion) => Chip(
-                              label: Text(
-                                suggestion,
-                                style: TextStyle(fontSize: 12),
-                              ),
-                              backgroundColor: Color(0xFFFE7900).withOpacity(0.1),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                side: BorderSide(
-                                  color: Color(0xFFFE7900).withOpacity(0.3)),
-                              ),
-                            )).toList(),
-                          ),
-                        ],
-                      ),
-                    ],
+                            SizedBox(height: 4),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children:
+                                  suggestions
+                                      .map(
+                                        (suggestion) => Chip(
+                                          label: Text(
+                                            suggestion,
+                                            style: TextStyle(fontSize: 12),
+                                          ),
+                                          backgroundColor: Color(
+                                            0xFFFE7900,
+                                          ).withOpacity(0.1),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            side: BorderSide(
+                                              color: Color(
+                                                0xFFFE7900,
+                                              ).withOpacity(0.3),
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
